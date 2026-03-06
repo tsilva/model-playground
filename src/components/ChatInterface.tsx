@@ -9,6 +9,7 @@ import {
   ChangeEvent,
 } from "react";
 import { ChatMessage as ChatMessageType, ProgressInfo } from "@/types";
+import { MODEL_PRESETS } from "@/lib/constants";
 import { ChatMessage } from "./ChatMessage";
 import { ModelLoadingCard } from "./ModelLoadingCard";
 import { compressImage } from "@/lib/imageUtils";
@@ -21,6 +22,7 @@ interface ChatInterfaceProps {
   processingMessage: string;
   isModelLoaded: boolean;
   loadedModel: string | null;
+  modelId: string;
   isLoading: boolean;
   loadingProgress: Map<string, ProgressInfo>;
   loadingMessage: string;
@@ -62,6 +64,7 @@ export function ChatInterface({
   processingMessage,
   isModelLoaded,
   loadedModel,
+  modelId,
   isLoading,
   loadingProgress,
   loadingMessage,
@@ -210,7 +213,7 @@ export function ChatInterface({
   };
 
   const hasMessages = messages.length > 0;
-  const modelName = "Qwen3.5 0.8B";
+  const modelName = MODEL_PRESETS.find(p => p.id === modelId)?.label?.replace(/\s*\(.*\)/, "") || modelId.split("/").pop() || "Unknown model";
   const needsLoad = !isModelLoaded;
 
   return (

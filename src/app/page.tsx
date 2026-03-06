@@ -281,17 +281,12 @@ export default function Home() {
 
   const handleModelChange = useCallback(
     (modelId: string) => {
-      console.log("[handleModelChange] called with:", modelId, "activeConv:", storage.activeConversation?.id, "activeConv.modelId:", storage.activeConversation?.modelId);
       if (storage.activeConversation) {
         const updatedConv = { ...storage.activeConversation, modelId };
-        console.log("[handleModelChange] updating conversation modelId to:", updatedConv.modelId);
         storage.updateConversation(updatedConv);
-      } else {
-        console.log("[handleModelChange] NO activeConversation!");
       }
       // If a model is already loaded and it's different, unload it so next message loads new model
       if (worker.loadedModel && worker.loadedModel !== modelId) {
-        console.log("[handleModelChange] resetting worker, loadedModel:", worker.loadedModel);
         worker.reset();
       }
     },
@@ -385,6 +380,7 @@ export default function Home() {
           processingMessage={worker.processingMessage}
           isModelLoaded={isModelLoaded}
           loadedModel={worker.loadedModel}
+          modelId={storage.activeConversation?.modelId || DEFAULT_MODEL}
           isLoading={isLoading}
           loadingProgress={worker.progress}
           loadingMessage={worker.loadingMessage}
