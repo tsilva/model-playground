@@ -220,17 +220,17 @@ export default function Home() {
         messages: updatedMessages,
         title,
         updatedAt: Date.now(),
-        modelId: DEFAULT_MODEL,
+        modelId: activeConv.modelId || DEFAULT_MODEL,
       };
       storage.updateConversation(updatedConv);
 
       const needsLoad = worker.status === "idle" || worker.status === "error";
-      const needsSwitch = worker.loadedModel && worker.loadedModel !== DEFAULT_MODEL;
+      const needsSwitch = worker.loadedModel && worker.loadedModel !== updatedConv.modelId;
 
       if (needsLoad || needsSwitch) {
         setPendingGeneration({ content, images });
         setError(null);
-        worker.loadModel(DEFAULT_MODEL, device);
+        worker.loadModel(updatedConv.modelId, device);
       } else if (worker.status === "loaded") {
         const assistantMsg: ChatMessageType = {
           id: crypto.randomUUID(),
@@ -277,6 +277,20 @@ export default function Home() {
       }
     },
     [worker]
+  );
+
+  const handleModelChange = useCallback(
+    (modelId: string) => {
+      if (storage.activeConversation) {
+        const updatedConv = { ...storage.activeConversation, modelId };
+        storage.updateConversation(updatedConv);
+      }
+      // If a model is already loaded and it's different, unload it so next message loads new model
+      if (worker.loadedModel && worker.loadedModel !== modelId) {
+        worker.reset();
+      }
+    },
+    [storage, worker]
   );
 
   const handleSwitchConversation = (id: string) => {
@@ -393,6 +407,8 @@ export default function Home() {
           storage.clearAllChats();
         }}
         isGenerating={isGenerating}
+        modelId={storage.activeConversation?.modelId || DEFAULT_MODEL}
+        onModelChange={handleModelChange}
       />
     </div>
   );

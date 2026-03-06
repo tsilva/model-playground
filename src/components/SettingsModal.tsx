@@ -1,8 +1,8 @@
 "use client";
 
 import { GenerationParams, StorageStats } from "@/types";
-import { DEFAULT_PARAMS, PARAM_RANGES } from "@/lib/constants";
-import { X, Trash, Cpu, RotateCcw, HardDrive } from "lucide-react";
+import { DEFAULT_PARAMS, PARAM_RANGES, MODEL_PRESETS } from "@/lib/constants";
+import { X, Trash, Cpu, RotateCcw, HardDrive, Box } from "lucide-react";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -16,6 +16,8 @@ interface SettingsModalProps {
   conversationsCount: number;
   onClearAllChats: () => void;
   isGenerating: boolean;
+  modelId: string;
+  onModelChange: (modelId: string) => void;
 }
 
 function SectionHeader({
@@ -91,6 +93,8 @@ export function SettingsModal({
   conversationsCount,
   onClearAllChats,
   isGenerating,
+  modelId,
+  onModelChange,
 }: SettingsModalProps) {
   if (!isOpen) return null;
 
@@ -159,6 +163,26 @@ export function SettingsModal({
                 >
                   WASM
                 </button>
+              </div>
+            </div>
+
+            {/* Model selector */}
+            <div className="space-y-2">
+              <label className="text-xs text-[#8e8e8e]">Model</label>
+              <div className="relative">
+                <select
+                  value={modelId}
+                  onChange={(e) => onModelChange(e.target.value)}
+                  disabled={isGenerating}
+                  className="w-full appearance-none rounded-lg border border-white/[0.08] bg-[#212121] px-3 py-2 text-sm text-[#ececec] outline-none transition-colors hover:border-white/[0.15] focus:border-[#10a37f]/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {MODEL_PRESETS.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.label}
+                    </option>
+                  ))}
+                </select>
+                <Box size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8e8e8e] pointer-events-none" />
               </div>
             </div>
 
