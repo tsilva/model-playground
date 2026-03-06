@@ -38,9 +38,10 @@ export function ModelSelector({ isLoading, loadedModel, loadedPrecision, device,
     };
   }, [open]);
 
+  const presetLabel = MODEL_PRESETS.find(p => p.id === modelId)?.label?.replace(/\s*\(.*\)/, "");
   const displayModel = isLoading
     ? "Loading..."
-    : (loadedModel?.replace(/^onnx-community\//, "") || MODEL_PRESETS.find(p => p.id === modelId)?.label?.replace(/\s*\(.*\)/, "") || "Qwen3.5 0.8B");
+    : presetLabel || loadedModel?.replace(/^onnx-community\//, "") || "Qwen3.5 0.8B";
 
   const runtimeLabel = webgpuSupported === null
     ? "Checking..."
