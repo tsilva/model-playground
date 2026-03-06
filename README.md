@@ -1,6 +1,10 @@
 <div align="center">
   <img src="logo.png" alt="llame" width="512"/>
 
+  [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/) [![Deploy](https://img.shields.io/badge/demo-live-brightgreen)](https://llame.vercel.app)
+
+  **No Python. No CUDA. No server. Just a URL.**
+
   **🧠 Run LLMs directly in your browser — no server, no API keys, just WebGPU ⚡**
 
   [Live Demo](https://llame.vercel.app)
@@ -70,6 +74,17 @@ All inference runs in a dedicated Web Worker (`inference.worker.ts`) using `@hug
 
 Models are loaded from the [ONNX Community](https://huggingface.co/onnx-community) on Hugging Face and cached in the browser after first download.
 
+## 💻 Requirements
+
+| Requirement | WebGPU (recommended) | WASM (fallback) |
+|-------------|----------------------|-----------------|
+| Browser | Chrome 113+, Edge 113+ | All modern browsers |
+| GPU VRAM | 1GB+ (0.6B model), 2GB+ (1.7B model) | N/A |
+| RAM | 4GB+ | 4GB+ |
+| Precision | fp16 | q4 (quantized) |
+
+WebGPU is detected automatically. If unavailable, the app falls back to WASM with quantized models.
+
 ## 🌐 Deployment
 
 The app is configured as a static export (`output: "export"`) with required `Cross-Origin-Embedder-Policy` and `Cross-Origin-Opener-Policy` headers for `SharedArrayBuffer` support.
@@ -94,3 +109,11 @@ The included `vercel.json` handles the required COOP/COEP headers automatically.
 ## 📄 License
 
 MIT
+
+---
+
+<div align="center">
+
+[Try the Live Demo](https://llame.vercel.app) · [Read the Architecture](#%EF%B8%8F-architecture) · [Star on GitHub](https://github.com/tsilva/llame) ⭐
+
+</div>
