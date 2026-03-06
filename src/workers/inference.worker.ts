@@ -281,6 +281,7 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
       add_generation_prompt: true,
       ...(isQwen && { enable_thinking: true }),
     }) as string;
+    console.log("[TEMPLATE]", inputText.slice(-200));
 
     // Calculate input token count for context fullness tracking
     const inputTokens = tokenizer(inputText, { return_tensor: false }).input_ids.length;
