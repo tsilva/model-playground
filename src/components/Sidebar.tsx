@@ -15,8 +15,6 @@ interface SidebarProps {
   onDeleteConversation: (id: string) => void;
   isLoading: boolean;
   isGenerating: boolean;
-  device: "webgpu" | "wasm";
-  webgpuSupported: boolean | null;
 }
 
 export function Sidebar({
@@ -31,8 +29,6 @@ export function Sidebar({
   onDeleteConversation,
   isLoading,
   isGenerating,
-  device,
-  webgpuSupported,
 }: SidebarProps) {
   // Sort conversations by updatedAt (most recent first)
   const sortedConversations = [...conversations].sort((a, b) => b.updatedAt - a.updatedAt);
@@ -123,26 +119,6 @@ export function Sidebar({
 
       {/* Bottom section */}
       <div className="border-t border-white/[0.08] p-3 space-y-1">
-        {/* Device indicator */}
-        <div className="flex items-center gap-2 px-2 py-1.5">
-          <span
-            className={`inline-block h-2 w-2 rounded-full ${
-              webgpuSupported === null
-                ? "bg-[#8e8e8e]"
-                : device === "webgpu" && webgpuSupported
-                  ? "bg-[#10a37f]"
-                  : "bg-amber-400"
-            }`}
-          />
-          <span className="text-xs text-[#b4b4b4]">
-            {webgpuSupported === null
-              ? "Checking..."
-              : device === "webgpu" && webgpuSupported
-                ? "WebGPU"
-                : "WASM"}
-          </span>
-        </div>
-
         <button
           onClick={onOpenSettings}
           className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors"

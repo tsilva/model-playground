@@ -4,14 +4,22 @@ interface ModelSelectorProps {
   isLoading: boolean;
   loadedModel: string | null;
   loadedPrecision: string | null;
+  device: "webgpu" | "wasm";
+  webgpuSupported: boolean | null;
 }
 
-export function ModelSelector({ isLoading, loadedModel, loadedPrecision }: ModelSelectorProps) {
+export function ModelSelector({ isLoading, loadedModel, loadedPrecision, device, webgpuSupported }: ModelSelectorProps) {
   const isModelReady = loadedModel !== null && !isLoading;
 
   const displayModel = isLoading
     ? "Loading..."
     : (loadedModel?.replace(/^onnx-community\//, "") || "Qwen3.5 0.8B");
+
+  const runtimeLabel = webgpuSupported === null
+    ? "Checking..."
+    : device === "webgpu" && webgpuSupported
+      ? "WebGPU"
+      : "WASM";
 
   return (
     <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[#ececec]">
@@ -32,6 +40,9 @@ export function ModelSelector({ isLoading, loadedModel, loadedPrecision }: Model
           · {loadedPrecision}
         </span>
       )}
+      <span className="text-xs text-[#8e8e8e] ml-1">
+        · {runtimeLabel}
+      </span>
     </div>
   );
 }

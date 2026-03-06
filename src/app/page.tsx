@@ -11,7 +11,7 @@ import { ChatInterface } from "@/components/ChatInterface";
 import { ModelSelector } from "@/components/ModelSelector";
 import { Sidebar } from "@/components/Sidebar";
 import { SettingsModal } from "@/components/SettingsModal";
-import { PanelLeft } from "lucide-react";
+import { PanelLeft, Github } from "lucide-react";
 
 export default function Home() {
   const webgpu = useWebGPU();
@@ -309,8 +309,6 @@ export default function Home() {
         onDeleteConversation={deleteConversation}
         isLoading={isLoading}
         isGenerating={isGenerating}
-        device={device}
-        webgpuSupported={webgpu.supported}
       />
 
       {/* Main area */}
@@ -329,12 +327,23 @@ export default function Home() {
             loadedModel={worker.loadedModel}
             loadedPrecision={worker.loadedPrecision}
             isLoading={isLoading}
+            device={device}
+            webgpuSupported={webgpu.supported}
           />
           {isGenerating && worker.tps > 0 && (
             <span className="ml-auto text-xs font-mono text-[#8e8e8e]">
               {worker.tps.toFixed(1)} t/s
             </span>
           )}
+          <a
+            href="https://github.com/tsilva/llame"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-lg p-2 text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors"
+            aria-label="GitHub repository"
+          >
+            <Github size={20} />
+          </a>
         </div>
 
         {error && (
