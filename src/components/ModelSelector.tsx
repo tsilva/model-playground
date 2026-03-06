@@ -1,21 +1,25 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MODEL_PRESETS, DEFAULT_MODEL } from "@/lib/constants";
-import { ChevronDown, Check } from "lucide-react";
+import { MODEL_PRESETS } from "@/lib/constants";
+import { ChevronDown, Check, Circle } from "lucide-react";
 
 interface ModelSelectorProps {
-  onLoad: (modelId: string) => void;
+  selectedModel: string;
   loadedModel: string | null;
   isLoading: boolean;
   disabled: boolean;
+  onSelect: (modelId: string) => void;
+  onLoad: (modelId: string) => void;
 }
 
 export function ModelSelector({
-  onLoad,
+  selectedModel,
   loadedModel,
   isLoading,
   disabled,
+  onSelect,
+  onLoad,
 }: ModelSelectorProps) {
   const [open, setOpen] = useState(false);
   const [customId, setCustomId] = useState("");
@@ -31,9 +35,11 @@ export function ModelSelector({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const displayName = loadedModel
-    ? loadedModel.split("/").pop()
+  const displayName = selectedModel
+    ? selectedModel.split("/").pop()
     : "Select model";
+
+  const isModelReady = loadedModel === selectedModel && !isLoading;
 
   return (
     <div ref={ref} className="relative">
@@ -41,6 +47,16 @@ export function ModelSelector({
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[#ececec] hover:bg-[#2f2f2f] transition-colors"
       >
+        {/* Status indicator */}
+        <span
+          className={`inline-block h-2 w-2 rounded-full ${
+            isLoading
+              ? "bg-amber-400 animate-pulse"
+              : isModelReady
+                ? "bg-[#10a37f]"
+                : "bg-[#8e8e8e]"
+          }`}
+        />
         <span className="max-w-[200px] truncate">
           {isLoading ? "Loading..." : displayName}
         </span>
@@ -56,16 +72,18 @@ export function ModelSelector({
             <button
               key={preset.id}
               onClick={() => {
-                onLoad(preset.id);
+                onSelect(preset.id);
                 setOpen(false);
               }}
               disabled={isLoading || disabled}
               className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-[#ececec] hover:bg-[#424242] transition-colors disabled:opacity-40"
             >
-              <span className="w-4 flex-shrink-0">
-                {loadedModel === preset.id && (
+              <span className="w-4 flex-shrink-0 flex justify-center">
+                {loadedModel === preset.id ? (
                   <Check size={14} className="text-[#10a37f]" />
-                )}
+                ) : selectedModel === preset.id ? (
+                  <Circle size={14} className="text-[#8e8e8e]" />
+                ) : null}
               </span>
               {preset.label}
             </button>
@@ -81,7 +99,7 @@ export function ModelSelector({
                 onChange={(e) => setCustomId(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && customId.trim()) {
-                    onLoad(customId.trim());
+                    onSelect(customId.trim());
                     setOpen(false);
                     setCustomId("");
                   }
@@ -92,7 +110,7 @@ export function ModelSelector({
               <button
                 onClick={() => {
                   if (customId.trim()) {
-                    onLoad(customId.trim());
+                    onSelect(customId.trim());
                     setOpen(false);
                     setCustomId("");
                   }
@@ -100,7 +118,7 @@ export function ModelSelector({
                 disabled={!customId.trim() || isLoading || disabled}
                 className="rounded-lg bg-[#10a37f] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#0d8c6d] disabled:opacity-40 transition-colors"
               >
-                Load
+                Select
               </button>
             </div>
           </div>

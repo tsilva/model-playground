@@ -16,11 +16,12 @@ interface ChatInterfaceProps {
   messages: ChatMessageType[];
   isGenerating: boolean;
   isModelLoaded: boolean;
+  selectedModel: string;
+  loadedModel: string | null;
   onSend: (content: string, images?: string[]) => void;
   onStop: () => void;
   tps: number;
   numTokens: number;
-  loadedModel: string | null;
   device: string | null;
 }
 
@@ -41,11 +42,12 @@ export function ChatInterface({
   messages,
   isGenerating,
   isModelLoaded,
+  selectedModel,
+  loadedModel,
   onSend,
   onStop,
   tps,
   numTokens,
-  loadedModel,
   device,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
@@ -76,12 +78,7 @@ export function ChatInterface({
 
   const handleSend = () => {
     const trimmed = input.trim();
-    if (
-      (!trimmed && pendingImages.length === 0) ||
-      isGenerating ||
-      !isModelLoaded
-    )
-      return;
+    if ((!trimmed && pendingImages.length === 0) || isGenerating) return;
 
     const imageDataUrls = pendingImages.map((img) => img.dataUrl);
 
@@ -149,6 +146,8 @@ export function ChatInterface({
   };
 
   const hasMessages = messages.length > 0;
+  const modelName = selectedModel.split("/").pop();
+  const needsLoad = !isModelLoaded || loadedModel !== selectedModel;
 
   return (
     <div
@@ -176,29 +175,27 @@ export function ChatInterface({
             <h1 className="mb-2 text-2xl font-semibold text-[#ececec]">
               How can I help you today?
             </h1>
-            {loadedModel && (
+            {modelName && (
               <p className="mb-8 text-sm text-[#8e8e8e]">
-                {loadedModel.split("/").pop()}
+                Using {modelName}
+                {needsLoad && (
+                  <span className="text-amber-400 ml-1">
+                    (will load on first message)
+                  </span>
+                )}
               </p>
             )}
-            {!loadedModel && (
-              <p className="mb-8 text-sm text-[#8e8e8e]">
-                Load a model to get started
-              </p>
-            )}
-            {isModelLoaded && (
-              <div className="grid max-w-[500px] grid-cols-2 gap-2">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => onSend(s)}
-                    className="rounded-xl border border-white/[0.08] px-4 py-3 text-left text-sm text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="grid max-w-[500px] grid-cols-2 gap-2">
+              {SUGGESTIONS.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => onSend(s)}
+                  className="rounded-xl border border-white/[0.08] px-4 py-3 text-left text-sm text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
@@ -258,14 +255,14 @@ export function ChatInterface({
               accept="image/*"
               multiple
               className="hidden"
-              disabled={!isModelLoaded}
+              disabled={needsLoad}
             />
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              disabled={!isModelLoaded || pendingImages.length >= 5}
+              disabled={needsLoad || pendingImages.length >= 5}
               className="mb-0.5 rounded-lg p-1.5 text-[#8e8e8e] hover:text-[#ececec] transition-colors disabled:opacity-40"
-              title="Upload images"
+              title={needsLoad ? "Load model first to use images" : "Upload images"}
             >
               <ImagePlus size={20} />
             </button>
@@ -276,11 +273,12 @@ export function ChatInterface({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={
-                isModelLoaded ? "Message..." : "Load a model first..."
+                needsLoad
+                  ? `Message (will load ${modelName}...)...`
+                  : "Message..."
               }
-              disabled={!isModelLoaded}
               rows={1}
-              className="max-h-[200px] flex-1 resize-none self-center bg-transparent text-sm text-[#ececec] placeholder-[#8e8e8e] outline-none disabled:opacity-40"
+              className="max-h-[200px] flex-1 resize-none self-center bg-transparent text-sm text-[#ececec] placeholder-[#8e8e8e] outline-none"
             />
 
             {isGenerating ? (
@@ -293,10 +291,7 @@ export function ChatInterface({
             ) : (
               <button
                 onClick={handleSend}
-                disabled={
-                  (!input.trim() && pendingImages.length === 0) ||
-                  !isModelLoaded
-                }
+                disabled={!input.trim() && pendingImages.length === 0}
                 className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white transition-colors hover:bg-gray-200 disabled:bg-[#424242] disabled:text-[#8e8e8e]"
               >
                 <ArrowUp size={18} className="text-[#212121]" />
@@ -306,8 +301,9 @@ export function ChatInterface({
         </div>
 
         <p className="mt-2 text-center text-xs text-[#8e8e8e]">
-          Running locally via {device?.toUpperCase() || "browser"}. Enter to
-          send, Shift+Enter for new line.
+          {needsLoad
+            ? `First message will load ${modelName}`
+            : `Running locally via ${device?.toUpperCase() || "browser"}. Enter to send, Shift+Enter for new line.`}
         </p>
       </div>
     </div>

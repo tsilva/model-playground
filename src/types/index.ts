@@ -6,6 +6,15 @@ export interface ChatMessage {
   images?: string[]; // Base64-encoded images for VLM support
 }
 
+export interface Conversation {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: number;
+  updatedAt: number;
+  modelId: string;
+}
+
 export interface GenerationParams {
   max_new_tokens: number;
   temperature: number;
