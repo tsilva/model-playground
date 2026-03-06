@@ -91,6 +91,14 @@ export function ChatInterface({
     }
   }, [input]);
 
+  // Clear input when conversation changes (new conversation or switch)
+  useEffect(() => {
+    if (messages.length === 0) {
+      setInput("");
+      setPendingImages([]);
+    }
+  }, [messages]);
+
   const handleSend = () => {
     const trimmed = input.trim();
     if ((!trimmed && pendingImages.length === 0) || isGenerating) return;
