@@ -31,6 +31,13 @@ class ThinkingParser {
   private thinkingComplete = false;
   private hasDetectedThinking = false;
 
+  constructor(startInThinking = false) {
+    if (startInThinking) {
+      this.inThinking = true;
+      this.hasDetectedThinking = true;
+    }
+  }
+
   // Tag patterns for different model formats
   private static readonly START_PATTERNS = [
     "<thinking>",
@@ -255,8 +262,6 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
   shouldInterrupt = false;
   post({ status: "generating" });
 
-  const parser = new ThinkingParser();
-
   try {
     // Check if this is a Qwen3.5 VLM model
     const isQwen35 = currentModelId?.includes("Qwen3.5") ?? false;
@@ -281,7 +286,11 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
       add_generation_prompt: true,
       ...(isQwen && { enable_thinking: true }),
     }) as string;
-    console.log("[TEMPLATE]", inputText.slice(-200));
+
+    // If the template ends with <think>, the model will start generating thinking
+    // content directly — so initialize the parser in thinking mode
+    const templateEndsWithThink = inputText.trimEnd().endsWith("<think>");
+    const parser = new ThinkingParser(templateEndsWithThink);
 
     // Calculate input token count for context fullness tracking
     const inputTokens = tokenizer(inputText, { return_tensor: false }).input_ids.length;
@@ -305,17 +314,14 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
       skip_prompt: true,
       skip_special_tokens: false,
       callback_function: (rawToken: string) => {
-        console.log("[TOKEN RAW]", JSON.stringify(rawToken));
         // Filter out special tokens except thinking tags (which we need to parse)
         const token = rawToken.replace(/<\|[^>]*\|>/g, "");
-        console.log("[TOKEN FILTERED]", JSON.stringify(token));
         if (!token) return;
         numTokens++;
         const elapsed = (performance.now() - startTime) / 1000;
         const tps = numTokens / elapsed;
-        
+
         const result = parser.processToken(token);
-        console.log("[PARSER]", result.type, JSON.stringify(result.content), result.thinkingComplete ? "COMPLETE" : "");
 
         if (result.type === "thinking" && result.content) {
           post({ status: "update", token: result.content, tps, numTokens, inputTokens, isThinking: true });

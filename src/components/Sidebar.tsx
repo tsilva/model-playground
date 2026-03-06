@@ -1,8 +1,6 @@
 "use client";
 
-import { ConversationMeta, StorageStats } from "@/types";
-import { StorageWarning } from "@/hooks/useStorage";
-import { StorageIndicator } from "./StorageIndicator";
+import { ConversationMeta } from "@/types";
 import { PanelLeft, SquarePen, Settings, Trash2, MessageSquare } from "lucide-react";
 
 interface SidebarProps {
@@ -19,9 +17,6 @@ interface SidebarProps {
   isGenerating: boolean;
   device: "webgpu" | "wasm";
   webgpuSupported: boolean | null;
-  storageStats: StorageStats;
-  storageWarning: StorageWarning;
-  onClearOldChats: () => void;
 }
 
 export function Sidebar({
@@ -38,9 +33,6 @@ export function Sidebar({
   isGenerating,
   device,
   webgpuSupported,
-  storageStats,
-  storageWarning,
-  onClearOldChats,
 }: SidebarProps) {
   // Sort conversations by updatedAt (most recent first)
   const sortedConversations = [...conversations].sort((a, b) => b.updatedAt - a.updatedAt);
@@ -150,12 +142,6 @@ export function Sidebar({
                 : "WASM"}
           </span>
         </div>
-
-        <StorageIndicator
-          stats={storageStats}
-          warning={storageWarning}
-          onClearOldChats={onClearOldChats}
-        />
 
         <button
           onClick={onOpenSettings}

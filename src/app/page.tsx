@@ -281,9 +281,6 @@ export default function Home() {
         isGenerating={isGenerating}
         device={device}
         webgpuSupported={webgpu.supported}
-        storageStats={storage.storageStats}
-        storageWarning={storage.storageWarning}
-        onClearOldChats={storage.clearOldChats}
       />
 
       {/* Main area */}
