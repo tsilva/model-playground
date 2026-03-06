@@ -249,7 +249,7 @@ export function ChatInterface({
             <button
               key={s.text}
               onClick={() => onSend(s.text, s.image ? [s.image] : undefined)}
-              disabled={isGenerating || needsLoad}
+              disabled={isGenerating}
               className="rounded-xl border border-white/[0.08] px-4 py-3 text-left text-sm text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {s.text}
