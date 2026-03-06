@@ -8,8 +8,9 @@ import {
   DragEvent,
   ChangeEvent,
 } from "react";
-import { ChatMessage as ChatMessageType } from "@/types";
+import { ChatMessage as ChatMessageType, ProgressInfo } from "@/types";
 import { ChatMessage } from "./ChatMessage";
+import { ModelLoadingCard } from "./ModelLoadingCard";
 import { Sparkles, ArrowUp, Square, ImagePlus, X } from "lucide-react";
 
 interface ChatInterfaceProps {
@@ -18,6 +19,9 @@ interface ChatInterfaceProps {
   isModelLoaded: boolean;
   selectedModel: string;
   loadedModel: string | null;
+  isLoading: boolean;
+  loadingProgress: Map<string, ProgressInfo>;
+  loadingMessage: string;
   onSend: (content: string, images?: string[]) => void;
   onStop: () => void;
   tps: number;
@@ -44,6 +48,9 @@ export function ChatInterface({
   isModelLoaded,
   selectedModel,
   loadedModel,
+  isLoading,
+  loadingProgress,
+  loadingMessage,
   onSend,
   onStop,
   tps,
@@ -178,11 +185,6 @@ export function ChatInterface({
             {modelName && (
               <p className="mb-8 text-sm text-[#8e8e8e]">
                 Using {modelName}
-                {needsLoad && (
-                  <span className="text-amber-400 ml-1">
-                    (will load on first message)
-                  </span>
-                )}
               </p>
             )}
             <div className="grid max-w-[500px] grid-cols-2 gap-2">
@@ -218,6 +220,14 @@ export function ChatInterface({
                 />
               );
             })}
+            {/* Model loading card - shown inline when loading */}
+            {isLoading && (
+              <ModelLoadingCard
+                progress={loadingProgress}
+                message={loadingMessage}
+                modelName={selectedModel}
+              />
+            )}
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -301,9 +311,11 @@ export function ChatInterface({
         </div>
 
         <p className="mt-2 text-center text-xs text-[#8e8e8e]">
-          {needsLoad
-            ? `First message will load ${modelName}`
-            : `Running locally via ${device?.toUpperCase() || "browser"}. Enter to send, Shift+Enter for new line.`}
+          {isLoading
+            ? `Loading ${modelName}...`
+            : needsLoad
+              ? `First message will load ${modelName}`
+              : `Running locally via ${device?.toUpperCase() || "browser"}. Enter to send, Shift+Enter for new line.`}
         </p>
       </div>
     </div>

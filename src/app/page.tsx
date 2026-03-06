@@ -5,7 +5,6 @@ import { ChatMessage as ChatMessageType, Conversation, GenerationParams } from "
 import { DEFAULT_PARAMS, DEFAULT_MODEL } from "@/lib/constants";
 import { useWebGPU } from "@/hooks/useWebGPU";
 import { useInferenceWorker } from "@/hooks/useInferenceWorker";
-import { ProgressOverlay } from "@/components/ProgressOverlay";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { ChatInterface } from "@/components/ChatInterface";
 import { ModelSelector } from "@/components/ModelSelector";
@@ -408,19 +407,15 @@ export default function Home() {
           <ErrorBanner error={error} onDismiss={() => setError(null)} />
         )}
 
-        {isLoading && (
-          <ProgressOverlay
-            progress={worker.progress}
-            message={worker.loadingMessage}
-          />
-        )}
-
         <ChatInterface
           messages={currentMessages}
           isGenerating={isGenerating}
           isModelLoaded={isModelLoaded}
           selectedModel={selectedModel}
           loadedModel={worker.loadedModel}
+          isLoading={isLoading}
+          loadingProgress={worker.progress}
+          loadingMessage={worker.loadingMessage}
           onSend={handleSend}
           onStop={handleStop}
           tps={worker.tps}

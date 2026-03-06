@@ -3,11 +3,15 @@
 import React, { useState } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import rehypeHighlight from "rehype-highlight";
+import rehypeKatex from "rehype-katex";
 import { Copy, Check } from "lucide-react";
 
 // Import highlight.js styles
 import "highlight.js/styles/github-dark.css";
+// Import KaTeX styles for math rendering
+import "katex/dist/katex.min.css";
 
 interface MarkdownRendererProps {
   content: string;
@@ -184,8 +188,8 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
   return (
     <div className="markdown-body">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeHighlight]}
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeHighlight, rehypeKatex]}
         components={components}
       >
         {content}
