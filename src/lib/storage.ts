@@ -3,7 +3,6 @@ import { Conversation, ConversationMeta, StorageStats } from "@/types";
 const KEYS = {
   INDEX: "llame-conversations-index",
   VERSION: "llame-storage-version",
-  SELECTED_MODEL: "llame-selected-model",
   OLD_CONVERSATIONS: "llame-conversations",
 };
 

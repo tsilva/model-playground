@@ -34,7 +34,7 @@
 - 🚀 **In-browser inference** — models run entirely on your device via Web Workers
 - ⚡ **WebGPU acceleration** — fp16 precision with automatic WASM fallback for unsupported browsers
 - 💬 **Chat interface** — real-time token streaming with tokens/second counter
-- 🔄 **Multiple models** — switch between Qwen3 0.6B, Qwen3 1.7B, and SmolLM2 360M
+- 🖼️ **Vision capable** — supports image input for visual question answering
 - 🎛️ **Tunable generation** — temperature, top-p, top-k, repetition penalty, max tokens
 - 📊 **Progress tracking** — live download progress overlay when loading models
 - 🔒 **Private by design** — nothing leaves your browser, ever
@@ -48,7 +48,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — the default model (Qwen3 0.6B) loads automatically.
+Open [http://localhost:3000](http://localhost:3000) — the Qwen3.5 0.8B model loads automatically.
 
 ## 🏗️ Architecture
 
@@ -64,13 +64,11 @@ src/
 
 All inference runs in a dedicated Web Worker (`inference.worker.ts`) using `@huggingface/transformers`, keeping the UI thread free.
 
-## 🎛️ Supported Models
+## 🎛️ Supported Model
 
 | Model | Size | Download |
 |-------|------|----------|
-| Qwen3 0.6B | 0.6B params | ~400MB |
-| Qwen3 1.7B | 1.7B params | ~1GB |
-| SmolLM2 360M | 360M params | ~250MB |
+| Qwen3.5 0.8B | 0.8B params | ~850MB |
 
 Models are loaded from the [ONNX Community](https://huggingface.co/onnx-community) on Hugging Face and cached in the browser after first download.
 
@@ -79,7 +77,7 @@ Models are loaded from the [ONNX Community](https://huggingface.co/onnx-communit
 | Requirement | WebGPU (recommended) | WASM (fallback) |
 |-------------|----------------------|-----------------|
 | Browser | Chrome 113+, Edge 113+ | All modern browsers |
-| GPU VRAM | 1GB+ (0.6B model), 2GB+ (1.7B model) | N/A |
+| GPU VRAM | 2GB+ | N/A |
 | RAM | 4GB+ | 4GB+ |
 | Precision | fp16 | q4 (quantized) |
 

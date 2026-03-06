@@ -89,30 +89,27 @@ export function useStorage() {
     [flushPendingSave]
   );
 
-  const createConversation = useCallback(
-    (modelId: string): Conversation => {
-      // Flush any pending save
-      flushPendingSave();
+  const createConversation = useCallback((): Conversation => {
+    // Flush any pending save
+    flushPendingSave();
 
-      const conv: Conversation = {
-        id: crypto.randomUUID(),
-        title: "New chat",
-        messages: [],
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        modelId,
-      };
+    const conv: Conversation = {
+      id: crypto.randomUUID(),
+      title: "New chat",
+      messages: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      modelId: "onnx-community/Qwen3.5-0.8B-ONNX",
+    };
 
-      const newIndex = storage.saveConversation(conv, indexRef.current);
-      setIndex(newIndex);
-      indexRef.current = newIndex;
-      setActiveIdState(conv.id);
-      setActiveConvState(conv);
-      refreshStats(newIndex);
-      return conv;
-    },
-    [flushPendingSave, refreshStats]
-  );
+    const newIndex = storage.saveConversation(conv, indexRef.current);
+    setIndex(newIndex);
+    indexRef.current = newIndex;
+    setActiveIdState(conv.id);
+    setActiveConvState(conv);
+    refreshStats(newIndex);
+    return conv;
+  }, [flushPendingSave, refreshStats]);
 
   const updateConversation = useCallback(
     (conv: Conversation) => {
@@ -201,42 +198,39 @@ export function useStorage() {
     refreshStats(currentIndex);
   }, [index, activeConversationId, refreshStats]);
 
-  const clearAllChats = useCallback(
-    (modelId: string): string => {
-      // Cancel any pending save
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current);
-        saveTimerRef.current = null;
-      }
-      pendingConvRef.current = null;
+  const clearAllChats = useCallback((): string => {
+    // Cancel any pending save
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    pendingConvRef.current = null;
 
-      // Delete all conversations from storage
-      const currentIndex = indexRef.current;
-      for (const meta of currentIndex) {
-        storage.deleteConversation(meta.id, currentIndex);
-      }
+    // Delete all conversations from storage
+    const currentIndex = indexRef.current;
+    for (const meta of currentIndex) {
+      storage.deleteConversation(meta.id, currentIndex);
+    }
 
-      // Create a fresh conversation
-      const newConv: Conversation = {
-        id: crypto.randomUUID(),
-        title: "New chat",
-        messages: [],
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        modelId,
-      };
+    // Create a fresh conversation
+    const newConv: Conversation = {
+      id: crypto.randomUUID(),
+      title: "New chat",
+      messages: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      modelId: "onnx-community/Qwen3.5-0.8B-ONNX",
+    };
 
-      const newIndex = storage.saveConversation(newConv, []);
-      setIndex(newIndex);
-      indexRef.current = newIndex;
-      setActiveIdState(newConv.id);
-      setActiveConvState(newConv);
-      refreshStats(newIndex);
+    const newIndex = storage.saveConversation(newConv, []);
+    setIndex(newIndex);
+    indexRef.current = newIndex;
+    setActiveIdState(newConv.id);
+    setActiveConvState(newConv);
+    refreshStats(newIndex);
 
-      return newConv.id;
-    },
-    [refreshStats]
-  );
+    return newConv.id;
+  }, [refreshStats]);
 
   const storageWarning: StorageWarning =
     storageStats.usedBytes / storageStats.quotaBytes > 0.95

@@ -18,8 +18,6 @@ export default function Home() {
   const worker = useInferenceWorker();
   const storage = useStorage();
 
-  // Model selection (separate from loaded model)
-  const [selectedModel, setSelectedModel] = useState<string>(DEFAULT_MODEL);
   const [pendingGeneration, setPendingGeneration] = useState<{ content: string; images?: string[] } | null>(null);
 
   const [params, setParams] = useState<GenerationParams>(DEFAULT_PARAMS);
@@ -38,30 +36,6 @@ export default function Home() {
   useEffect(() => {
     activeConversationIdRef.current = storage.activeConversationId;
   }, [storage.activeConversationId]);
-
-  // Set model from active conversation on mount
-  useEffect(() => {
-    if (storage.activeConversation) {
-      setSelectedModel(storage.activeConversation.modelId);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Save selected model to localStorage
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      localStorage.setItem("llame-selected-model", selectedModel);
-    } catch {
-      // Ignore
-    }
-  }, [selectedModel]);
-
-  // Load saved model on mount
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const savedModel = localStorage.getItem("llame-selected-model");
-    if (savedModel) setSelectedModel(savedModel);
-  }, []);
 
   // Track mobile breakpoint
   useEffect(() => {
@@ -175,16 +149,13 @@ export default function Home() {
       streamingThinkingRef.current = "";
       isCompleteRef.current = true;
     }
-    const newConv = storage.createConversation(selectedModel);
+    const newConv = storage.createConversation();
     if (isMobile) setSidebarOpen(false);
     return newConv;
-  }, [selectedModel, isMobile, worker, storage]);
+  }, [isMobile, worker, storage]);
 
   const deleteConversation = (id: string) => {
-    const switchedModelId = storage.deleteConversation(id);
-    if (switchedModelId) {
-      setSelectedModel(switchedModelId);
-    }
+    storage.deleteConversation(id);
   };
 
   const handleSend = useCallback(
@@ -215,17 +186,17 @@ export default function Home() {
         messages: updatedMessages,
         title,
         updatedAt: Date.now(),
-        modelId: selectedModel,
+        modelId: DEFAULT_MODEL,
       };
       storage.updateConversation(updatedConv);
 
       const needsLoad = worker.status === "idle" || worker.status === "error";
-      const needsSwitch = worker.loadedModel && worker.loadedModel !== selectedModel;
+      const needsSwitch = worker.loadedModel && worker.loadedModel !== DEFAULT_MODEL;
 
       if (needsLoad || needsSwitch) {
         setPendingGeneration({ content, images });
         setError(null);
-        worker.loadModel(selectedModel, device);
+        worker.loadModel(DEFAULT_MODEL, device);
       } else if (worker.status === "loaded") {
         const assistantMsg: ChatMessageType = {
           id: crypto.randomUUID(),
@@ -248,7 +219,7 @@ export default function Home() {
         );
       }
     },
-    [storage, selectedModel, worker, device, params, createNewConversation]
+    [storage, worker, device, params, createNewConversation]
   );
 
   const handleStop = useCallback(() => {
@@ -257,17 +228,6 @@ export default function Home() {
     streamingThinkingRef.current = "";
     isCompleteRef.current = true;
   }, [worker]);
-
-  const handleLoadModel = useCallback(
-    (modelId: string) => {
-      setSelectedModel(modelId);
-    },
-    []
-  );
-
-  const handleModelSelect = useCallback((modelId: string) => {
-    setSelectedModel(modelId);
-  }, []);
 
   const handleDeviceChange = useCallback(
     (d: "webgpu" | "wasm") => {
@@ -288,10 +248,6 @@ export default function Home() {
       isCompleteRef.current = true;
     }
     storage.setActiveConversation(id);
-    const meta = storage.index.find(m => m.id === id);
-    if (meta) {
-      setSelectedModel(meta.modelId);
-    }
     if (isMobile) setSidebarOpen(false);
   };
 
@@ -322,10 +278,7 @@ export default function Home() {
         storageWarning={storage.storageWarning}
         onClearOldChats={storage.clearOldChats}
         onClearAllChats={() => {
-          const newId = storage.clearAllChats(selectedModel);
-          if (newId) {
-            setSelectedModel(selectedModel);
-          }
+          storage.clearAllChats();
         }}
       />
 
@@ -342,12 +295,8 @@ export default function Home() {
             </button>
           )}
           <ModelSelector
-            selectedModel={selectedModel}
             loadedModel={worker.loadedModel}
             isLoading={isLoading}
-            disabled={isGenerating}
-            onSelect={handleModelSelect}
-            onLoad={handleLoadModel}
           />
           {isGenerating && worker.tps > 0 && (
             <span className="ml-auto text-xs font-mono text-[#8e8e8e]">
@@ -364,7 +313,6 @@ export default function Home() {
           messages={currentMessages}
           isGenerating={isGenerating}
           isModelLoaded={isModelLoaded}
-          selectedModel={selectedModel}
           loadedModel={worker.loadedModel}
           isLoading={isLoading}
           loadingProgress={worker.progress}

@@ -18,7 +18,6 @@ interface ChatInterfaceProps {
   messages: ChatMessageType[];
   isGenerating: boolean;
   isModelLoaded: boolean;
-  selectedModel: string;
   loadedModel: string | null;
   isLoading: boolean;
   loadingProgress: Map<string, ProgressInfo>;
@@ -48,15 +47,13 @@ const SUGGESTIONS: Suggestion[] = [
   { text: "Explain quantum computing in simple terms" },
   { text: "Write a haiku about programming" },
   { text: "What is the meaning of life?" },
-  { text: "Help me write a short story" },
-  { text: "Transcribe and describe this book page", image: bookPageImage.src },
+  { text: "Transcribe this book page", image: bookPageImage.src },
 ];
 
 export function ChatInterface({
   messages,
   isGenerating,
   isModelLoaded,
-  selectedModel,
   loadedModel,
   isLoading,
   loadingProgress,
@@ -179,8 +176,8 @@ export function ChatInterface({
   };
 
   const hasMessages = messages.length > 0;
-  const modelName = selectedModel.split("/").pop();
-  const needsLoad = !isModelLoaded || loadedModel !== selectedModel;
+  const modelName = "Qwen3.5 0.8B";
+  const needsLoad = !isModelLoaded;
 
   return (
     <div
@@ -251,7 +248,7 @@ export function ChatInterface({
               <ModelLoadingCard
                 progress={loadingProgress}
                 message={loadingMessage}
-                modelName={selectedModel}
+                modelName={modelName}
               />
             )}
             <div ref={messagesEndRef} />
