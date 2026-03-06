@@ -280,7 +280,7 @@ export function ChatInterface({
               }
               disabled={!isModelLoaded}
               rows={1}
-              className="max-h-[200px] flex-1 resize-none bg-transparent text-sm text-[#ececec] placeholder-[#8e8e8e] outline-none disabled:opacity-40"
+              className="max-h-[200px] flex-1 resize-none self-center bg-transparent text-sm text-[#ececec] placeholder-[#8e8e8e] outline-none disabled:opacity-40"
             />
 
             {isGenerating ? (

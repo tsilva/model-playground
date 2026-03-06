@@ -73,6 +73,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
             ...s,
             status: "loading",
             loadingMessage: data.message,
+            progress: new Map(),
             error: null,
           }));
           break;
