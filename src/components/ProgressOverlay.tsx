@@ -15,7 +15,7 @@ export function ProgressOverlay({ progress, message }: ProgressOverlayProps) {
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="flex w-full max-w-md flex-col gap-4 rounded-2xl border border-white/[0.08] bg-[#2f2f2f] p-6 max-h-[80vh]">
+      <div className="mx-4 sm:mx-auto flex w-full max-w-md flex-col gap-4 rounded-2xl border border-white/[0.08] bg-[#2f2f2f] p-4 sm:p-6 max-h-[80dvh]">
         <div className="text-center">
           <div className="mb-1 text-lg font-medium text-[#ececec]">
             Loading Model
@@ -42,7 +42,7 @@ export function ProgressOverlay({ progress, message }: ProgressOverlayProps) {
               {entries.map((p) => (
                 <div key={p.file} className="text-xs">
                   <div className="mb-0.5 flex justify-between text-[#8e8e8e]">
-                    <span className="max-w-[250px] truncate">{p.file}</span>
+                    <span className="max-w-[150px] sm:max-w-[250px] truncate">{p.file}</span>
                     <span>{p.progress.toFixed(0)}%</span>
                   </div>
                   <div className="h-1 overflow-hidden rounded-full bg-white/5">

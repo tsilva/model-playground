@@ -57,7 +57,7 @@ export function ModelSelector({
                 : "bg-[#8e8e8e]"
           }`}
         />
-        <span className="max-w-[200px] truncate">
+        <span className="max-w-[140px] sm:max-w-[200px] truncate">
           {isLoading ? "Loading..." : displayName}
         </span>
         <ChevronDown
@@ -67,7 +67,7 @@ export function ModelSelector({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-72 rounded-xl border border-white/[0.08] bg-[#2f2f2f] py-1 shadow-xl z-50">
+        <div className="absolute top-full left-0 mt-1 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-white/[0.08] bg-[#2f2f2f] py-1 shadow-xl z-50">
           {MODEL_PRESETS.map((preset) => (
             <button
               key={preset.id}

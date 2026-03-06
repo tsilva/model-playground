@@ -64,7 +64,7 @@ const CodeBlock: React.FC<{
           )}
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto">
+      <pre className="p-3 sm:p-4 overflow-x-auto">
         <code className={className}>{children}</code>
       </pre>
     </div>
@@ -101,12 +101,12 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
       </p>
     ),
     ul: ({ children }) => (
-      <ul className="mb-4 ml-4 list-disc text-[#ececec]">
+      <ul className="mb-4 ml-3 sm:ml-4 list-disc text-[#ececec]">
         {children}
       </ul>
     ),
     ol: ({ children }) => (
-      <ol className="mb-4 ml-4 list-decimal text-[#ececec]">
+      <ol className="mb-4 ml-3 sm:ml-4 list-decimal text-[#ececec]">
         {children}
       </ol>
     ),
@@ -143,12 +143,12 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
       </thead>
     ),
     th: ({ children }) => (
-      <th className="px-4 py-2 text-left text-sm font-semibold text-white border border-white/[0.08]">
+      <th className="px-2 py-1.5 sm:px-4 sm:py-2 text-left text-sm font-semibold text-white border border-white/[0.08]">
         {children}
       </th>
     ),
     td: ({ children }) => (
-      <td className="px-4 py-2 text-sm text-[#ececec] border border-white/[0.08]">
+      <td className="px-2 py-1.5 sm:px-4 sm:py-2 text-sm text-[#ececec] border border-white/[0.08]">
         {children}
       </td>
     ),

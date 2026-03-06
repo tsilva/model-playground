@@ -29,7 +29,7 @@ export function ChatMessage({
   if (isUser) {
     return (
       <div className="flex justify-end animate-fade-in">
-        <div className="max-w-[70%]">
+        <div className="max-w-[85%] md:max-w-[70%]">
           {hasImages && (
             <div className="flex gap-2 mb-2 flex-wrap justify-end">
               {message.images!.map((img, idx) => (
@@ -37,7 +37,7 @@ export function ChatMessage({
                   key={idx}
                   src={img}
                   alt={`Attachment ${idx + 1}`}
-                  className="max-w-[200px] max-h-[150px] object-cover rounded-2xl border border-white/[0.08]"
+                  className="max-w-[160px] max-h-[120px] sm:max-w-[200px] sm:max-h-[150px] object-cover rounded-2xl border border-white/[0.08]"
                 />
               ))}
             </div>

@@ -27,6 +27,7 @@ interface ChatInterfaceProps {
   tps: number;
   numTokens: number;
   device: string | null;
+  isMobile: boolean;
 }
 
 interface PendingImage {
@@ -64,6 +65,7 @@ export function ChatInterface({
   tps,
   numTokens,
   device,
+  isMobile,
 }: ChatInterfaceProps) {
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
@@ -203,7 +205,7 @@ export function ChatInterface({
                 Using {modelName}
               </p>
             )}
-            <div className="grid max-w-[500px] grid-cols-2 gap-2">
+            <div className="grid max-w-[500px] grid-cols-1 sm:grid-cols-2 gap-2">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s.text}
@@ -218,7 +220,7 @@ export function ChatInterface({
         )}
 
         {hasMessages && (
-          <div className="mx-auto max-w-[768px] space-y-6 px-4 py-6">
+          <div className="mx-auto max-w-[768px] space-y-6 px-3 py-4 md:px-4 md:py-6">
             {messages.map((msg, i) => {
               const isLastAssistant =
                 msg.role === "assistant" && i === messages.length - 1;
@@ -250,7 +252,7 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="mx-auto w-full max-w-[768px] px-4 pb-4 pt-2">
+      <div className="mx-auto w-full max-w-[768px] px-3 pb-3 pt-2 md:px-4 md:pb-4">
         <div className="rounded-3xl border border-white/[0.08] bg-[#2f2f2f] px-4 py-3">
           {/* Image previews inside pill */}
           {pendingImages.length > 0 && (
@@ -331,7 +333,9 @@ export function ChatInterface({
             ? `Loading ${modelName}...`
             : needsLoad
               ? `First message will load ${modelName}`
-              : `Running locally via ${device?.toUpperCase() || "browser"}. Enter to send, Shift+Enter for new line.`}
+              : isMobile
+                ? `Running locally via ${device?.toUpperCase() || "browser"}.`
+                : `Running locally via ${device?.toUpperCase() || "browser"}. Enter to send, Shift+Enter for new line.`}
         </p>
       </div>
     </div>

@@ -29,7 +29,7 @@ export function ModelLoadingCard({
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="rounded-2xl border border-white/[0.08] bg-[#2f2f2f] p-4 max-w-md">
+        <div className="rounded-2xl border border-white/[0.08] bg-[#2f2f2f] p-3 sm:p-4 max-w-md">
           {/* Header */}
           <div className="flex items-center gap-2 mb-3">
             <Loader2 size={16} className="text-[#10a37f] animate-spin" />
@@ -62,7 +62,7 @@ export function ModelLoadingCard({
                 {entries.map((p) => (
                   <div key={p.file} className="text-xs">
                     <div className="mb-0.5 flex justify-between text-[#8e8e8e]">
-                      <span className="max-w-[200px] truncate">{p.file}</span>
+                      <span className="max-w-[140px] sm:max-w-[200px] truncate">{p.file}</span>
                       <span>{p.progress.toFixed(0)}%</span>
                     </div>
                     <div className="h-1 overflow-hidden rounded-full bg-white/5">

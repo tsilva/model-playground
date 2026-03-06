@@ -87,3 +87,9 @@ body {
 .markdown-body code {
   font-family: var(--font-mono), "SF Mono", Monaco, Inconsolata, "Fira Code", monospace;
 }
+
+@media (max-width: 639px) {
+  .markdown-body {
+    line-height: 1.625rem;
+  }
+}

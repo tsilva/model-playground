@@ -32,6 +32,7 @@ export default function Home() {
   const [params, setParams] = useState<GenerationParams>(DEFAULT_PARAMS);
   const [device, setDevice] = useState<"webgpu" | "wasm">("webgpu");
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -63,6 +64,18 @@ export default function Home() {
     } catch {
       // Ignore localStorage errors
     }
+  }, []);
+
+  // Track mobile breakpoint
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
+    const onChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobile(e.matches);
+      if (e.matches) setSidebarOpen(false);
+    };
+    onChange(mql);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
   }, []);
 
   // Save to localStorage on conversations change
@@ -212,8 +225,9 @@ export default function Home() {
     };
     setConversations(prev => [newConv, ...prev]);
     setActiveConversationId(newConv.id);
+    if (isMobile) setSidebarOpen(false);
     return newConv;
-  }, [selectedModel]);
+  }, [selectedModel, isMobile]);
 
   const updateActiveConversation = (messages: ChatMessageType[]) => {
     if (!activeConversationId) return;
@@ -349,6 +363,7 @@ export default function Home() {
     if (conv) {
       setSelectedModel(conv.modelId);
     }
+    if (isMobile) setSidebarOpen(false);
   };
 
   const isLoading = worker.status === "loading";
@@ -359,10 +374,11 @@ export default function Home() {
   const currentMessages = activeConversation?.messages || [];
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#212121]">
+    <div className="flex h-dvh overflow-hidden bg-[#212121]">
       {/* Sidebar */}
       <Sidebar
         isOpen={sidebarOpen}
+        isMobile={isMobile}
         onToggle={() => setSidebarOpen(!sidebarOpen)}
         onNewChat={createNewConversation}
         onOpenSettings={() => setSettingsOpen(true)}
@@ -380,7 +396,7 @@ export default function Home() {
       <div className="relative flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-2">
-          {!sidebarOpen && (
+          {(!sidebarOpen || isMobile) && (
             <button
               onClick={() => setSidebarOpen(true)}
               className="rounded-lg p-2 text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors"
@@ -421,6 +437,7 @@ export default function Home() {
           tps={worker.tps}
           numTokens={worker.numTokens}
           device={worker.loadedDevice}
+          isMobile={isMobile}
         />
       </div>
 

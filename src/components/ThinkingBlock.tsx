@@ -94,8 +94,8 @@ export function ThinkingBlock({ thinking, isGenerating, isComplete }: ThinkingBl
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className={`mt-2 whitespace-pre-wrap border-l-2 border-white/[0.08] pl-4 text-sm leading-relaxed text-[#8e8e8e] ${
-            isGenerating ? "max-h-[200px] overflow-y-auto" : ""
+          className={`mt-2 whitespace-pre-wrap border-l-2 border-white/[0.08] pl-3 sm:pl-4 text-sm leading-relaxed text-[#8e8e8e] ${
+            isGenerating ? "max-h-[150px] sm:max-h-[200px] overflow-y-auto" : ""
           }`}
           style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}
         >

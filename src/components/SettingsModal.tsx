@@ -36,7 +36,7 @@ export function SettingsModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#2f2f2f] p-6 shadow-xl">
+      <div className="mx-4 sm:mx-auto w-full max-w-md max-h-[85dvh] flex flex-col rounded-2xl border border-white/[0.08] bg-[#2f2f2f] p-4 sm:p-6 shadow-xl">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-medium text-[#ececec]">Settings</h2>
@@ -48,7 +48,7 @@ export function SettingsModal({
           </button>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-5 overflow-y-auto flex-1">
           {/* Device selector */}
           <div className="space-y-2">
             <label className="text-xs text-[#8e8e8e]">Device</label>
