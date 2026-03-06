@@ -52,7 +52,7 @@ const STATIC_SUGGESTIONS: Suggestion[] = [
   { text: "Explain quantum computing in simple terms" },
   { text: "Code bubble sort in Python" },
   { text: "What is the meaning of life?" },
-  { text: "Transcribe this book page", image: bookPageImage.src },
+  { text: "Transcribe image to plain text", image: bookPageImage.src },
 ];
 
 export function ChatInterface({
@@ -126,7 +126,7 @@ export function ChatInterface({
           const dataUrl = reader.result as string;
           setSuggestions((prev) =>
             prev.map((s) =>
-              s.text === "Transcribe this book page" ? { ...s, image: dataUrl } : s
+              s.text === "Transcribe image to plain text" ? { ...s, image: dataUrl } : s
             )
           );
         };
