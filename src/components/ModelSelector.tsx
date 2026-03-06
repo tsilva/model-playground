@@ -1,19 +1,46 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
+import { ChevronDown, Check } from "lucide-react";
+import { MODEL_PRESETS } from "@/lib/constants";
+
 interface ModelSelectorProps {
   isLoading: boolean;
   loadedModel: string | null;
   loadedPrecision: string | null;
   device: "webgpu" | "wasm";
   webgpuSupported: boolean | null;
+  modelId: string;
+  onModelChange: (modelId: string) => void;
+  isGenerating: boolean;
 }
 
-export function ModelSelector({ isLoading, loadedModel, loadedPrecision, device, webgpuSupported }: ModelSelectorProps) {
+export function ModelSelector({ isLoading, loadedModel, loadedPrecision, device, webgpuSupported, modelId, onModelChange, isGenerating }: ModelSelectorProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
   const isModelReady = loadedModel !== null && !isLoading;
+  const disabled = isLoading || isGenerating;
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClick = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [open]);
 
   const displayModel = isLoading
     ? "Loading..."
-    : (loadedModel?.replace(/^onnx-community\//, "") || "Qwen3.5 0.8B");
+    : (loadedModel?.replace(/^onnx-community\//, "") || MODEL_PRESETS.find(p => p.id === modelId)?.label?.replace(/\s*\(.*\)/, "") || "Qwen3.5 0.8B");
 
   const runtimeLabel = webgpuSupported === null
     ? "Checking..."
@@ -22,27 +49,52 @@ export function ModelSelector({ isLoading, loadedModel, loadedPrecision, device,
       : "WASM";
 
   return (
-    <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[#ececec]">
-      <span
-        className={`inline-block h-2 w-2 rounded-full ${
-          isLoading
-            ? "bg-amber-400 animate-pulse"
-            : isModelReady
-              ? "bg-[#10a37f]"
-              : "bg-[#8e8e8e]"
-        }`}
-      />
-      <span className="max-w-[140px] sm:max-w-[200px] truncate">
-        {displayModel}
-      </span>
-      {loadedPrecision && !isLoading && (
-        <span className="text-xs text-[#8e8e8e] ml-1">
-          · {loadedPrecision}
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => !disabled && setOpen(!open)}
+        disabled={disabled}
+        className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[#ececec] hover:bg-[#2f2f2f] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span
+          className={`inline-block h-2 w-2 rounded-full ${
+            isLoading
+              ? "bg-amber-400 animate-pulse"
+              : isModelReady
+                ? "bg-[#10a37f]"
+                : "bg-[#8e8e8e]"
+          }`}
+        />
+        <span className="max-w-[140px] sm:max-w-[200px] truncate">
+          {displayModel}
         </span>
+        {loadedPrecision && !isLoading && (
+          <span className="text-xs text-[#8e8e8e] ml-1">
+            · {loadedPrecision}
+          </span>
+        )}
+        <span className="text-xs text-[#8e8e8e] ml-1">
+          · {runtimeLabel}
+        </span>
+        <ChevronDown size={14} className={`text-[#8e8e8e] ml-0.5 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1 z-50 min-w-[240px] rounded-xl border border-white/[0.08] bg-[#2f2f2f] py-1 shadow-2xl shadow-black/40 animate-fade-in">
+          {MODEL_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              onClick={() => {
+                onModelChange(preset.id);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[#ececec] hover:bg-[#424242] transition-colors"
+            >
+              <Check size={14} className={preset.id === modelId ? "text-[#10a37f]" : "invisible"} />
+              <span>{preset.label}</span>
+            </button>
+          ))}
+        </div>
       )}
-      <span className="text-xs text-[#8e8e8e] ml-1">
-        · {runtimeLabel}
-      </span>
     </div>
   );
 }

@@ -347,6 +347,9 @@ export default function Home() {
             isLoading={isLoading}
             device={device}
             webgpuSupported={webgpu.supported}
+            modelId={storage.activeConversation?.modelId || DEFAULT_MODEL}
+            onModelChange={handleModelChange}
+            isGenerating={isGenerating}
           />
           <div className="ml-auto flex items-center gap-2">
             {isGenerating && worker.tps > 0 && (
@@ -407,8 +410,6 @@ export default function Home() {
           storage.clearAllChats();
         }}
         isGenerating={isGenerating}
-        modelId={storage.activeConversation?.modelId || DEFAULT_MODEL}
-        onModelChange={handleModelChange}
       />
     </div>
   );
