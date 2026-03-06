@@ -282,6 +282,9 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
       add_generation_prompt: true,
     }) as string;
 
+    // Calculate input token count for context fullness tracking
+    const inputTokens = tokenizer(inputText, { return_tensor: false }).input_ids.length;
+
     // For VLM with images, use processor; otherwise use tokenizer
     let inputs: Record<string, unknown>;
     if (hasImages && processor) {
@@ -308,12 +311,12 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
         const result = parser.processToken(token);
         
         if (result.type === "thinking" && result.content) {
-          post({ status: "update", token: result.content, tps, numTokens, isThinking: true });
+          post({ status: "update", token: result.content, tps, numTokens, inputTokens, isThinking: true });
           if (result.thinkingComplete) {
             post({ status: "thinking_complete", thinking: parser.getThinkingContent() });
           }
         } else if (result.type === "content" && result.content) {
-          post({ status: "update", token: result.content, tps, numTokens, isThinking: false });
+          post({ status: "update", token: result.content, tps, numTokens, inputTokens, isThinking: false });
         }
       },
     });
@@ -332,11 +335,12 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
     // Flush any remaining content
     const remaining = parser.flush();
     if (remaining) {
+      const finalTps = numTokens / ((performance.now() - startTime) / 1000);
       if (remaining.type === "thinking") {
-        post({ status: "update", token: remaining.content, tps: numTokens / ((performance.now() - startTime) / 1000), numTokens, isThinking: true });
+        post({ status: "update", token: remaining.content, tps: finalTps, numTokens, inputTokens, isThinking: true });
         post({ status: "thinking_complete", thinking: parser.getThinkingContent() });
       } else {
-        post({ status: "update", token: remaining.content, tps: numTokens / ((performance.now() - startTime) / 1000), numTokens, isThinking: false });
+        post({ status: "update", token: remaining.content, tps: finalTps, numTokens, inputTokens, isThinking: false });
       }
     }
 

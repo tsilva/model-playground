@@ -55,15 +55,9 @@ export function useStorage() {
     indexRef.current = idx;
     refreshStats(idx);
 
-    // Set most recent as active
-    if (idx.length > 0) {
-      const sorted = [...idx].sort((a, b) => b.updatedAt - a.updatedAt);
-      const conv = storage.loadConversation(sorted[0].id);
-      if (conv) {
-        setActiveIdState(sorted[0].id);
-        setActiveConvState(conv);
-      }
-    }
+    // Don't auto-load any conversation - start fresh
+    setActiveIdState(null);
+    setActiveConvState(null);
 
     return () => {
       // Flush on unmount

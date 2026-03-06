@@ -60,7 +60,7 @@ export type WorkerResponse =
   | { status: "progress"; progress: ProgressInfo }
   | { status: "loaded"; modelId: string; device: string; precision: string }
   | { status: "generating" }
-  | { status: "update"; token: string; tps: number; numTokens: number; isThinking?: boolean }
+  | { status: "update"; token: string; tps: number; numTokens: number; inputTokens?: number; isThinking?: boolean }
   | { status: "thinking_complete"; thinking: string }
   | { status: "complete"; tps: number; numTokens: number }
   | { status: "error"; error: string }

@@ -11,6 +11,7 @@ import { ChatInterface } from "@/components/ChatInterface";
 import { ModelSelector } from "@/components/ModelSelector";
 import { Sidebar } from "@/components/Sidebar";
 import { SettingsModal } from "@/components/SettingsModal";
+import { ContextIndicator } from "@/components/ContextIndicator";
 import { PanelLeft } from "lucide-react";
 
 export default function Home() {
@@ -36,6 +37,13 @@ export default function Home() {
   useEffect(() => {
     activeConversationIdRef.current = storage.activeConversationId;
   }, [storage.activeConversationId]);
+
+  // Always start with a new chat on page load
+  useEffect(() => {
+    if (!storage.activeConversationId) {
+      createNewConversation();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track mobile breakpoint
   useEffect(() => {
@@ -304,6 +312,10 @@ export default function Home() {
               {worker.tps.toFixed(1)} t/s
             </span>
           )}
+          <ContextIndicator
+            fullness={worker.contextFullness}
+            isModelLoaded={isModelLoaded}
+          />
         </div>
 
         {error && (

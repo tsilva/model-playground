@@ -9,6 +9,10 @@ interface ModelSelectorProps {
 export function ModelSelector({ isLoading, loadedModel, loadedPrecision }: ModelSelectorProps) {
   const isModelReady = loadedModel !== null && !isLoading;
 
+  const displayModel = isLoading
+    ? "Loading..."
+    : (loadedModel?.replace(/^onnx-community\//, "") || "Qwen3.5 0.8B");
+
   return (
     <div className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[#ececec]">
       <span
@@ -21,7 +25,7 @@ export function ModelSelector({ isLoading, loadedModel, loadedPrecision }: Model
         }`}
       />
       <span className="max-w-[140px] sm:max-w-[200px] truncate">
-        {isLoading ? "Loading..." : (loadedModel || "Qwen3.5 0.8B")}
+        {displayModel}
       </span>
       {loadedPrecision && !isLoading && (
         <span className="text-xs text-[#8e8e8e] ml-1">

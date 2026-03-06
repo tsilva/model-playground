@@ -6,6 +6,10 @@ export const MODEL_PRESETS = [
   { id: "onnx-community/Qwen3.5-0.8B-ONNX", label: "Qwen3.5 0.8B (~850MB)" },
 ];
 
+export const CONTEXT_WINDOWS: Record<string, number> = {
+  "onnx-community/Qwen3.5-0.8B-ONNX": 32768, // 32k context window
+};
+
 export const DEFAULT_PARAMS: GenerationParams = {
   max_new_tokens: 512,
   temperature: 0.7,

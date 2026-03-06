@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   WorkerResponse,
   WorkerRequest,
@@ -8,6 +8,7 @@ import {
   GenerationParams,
   ProgressInfo,
 } from "@/types";
+import { CONTEXT_WINDOWS } from "@/lib/constants";
 
 export type InferenceStatus =
   | "idle"
@@ -26,6 +27,7 @@ interface InferenceState {
   loadedPrecision: string | null;
   tps: number;
   numTokens: number;
+  inputTokens: number;
 }
 
 interface UseInferenceWorkerReturn extends InferenceState {
@@ -36,6 +38,8 @@ interface UseInferenceWorkerReturn extends InferenceState {
   onTokenRef: React.MutableRefObject<((token: string, isThinking?: boolean) => void) | null>;
   onThinkingCompleteRef: React.MutableRefObject<((thinking: string) => void) | null>;
   onCompleteRef: React.MutableRefObject<(() => void) | null>;
+  contextFullness: number;
+  contextWindow: number;
 }
 
 export function useInferenceWorker(): UseInferenceWorkerReturn {
@@ -54,6 +58,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
     loadedPrecision: null,
     tps: 0,
     numTokens: 0,
+    inputTokens: 0,
   });
 
   useEffect(() => {
@@ -106,6 +111,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
             status: "generating",
             tps: 0,
             numTokens: 0,
+            inputTokens: 0,
           }));
           break;
 
@@ -115,6 +121,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
             ...s,
             tps: data.tps,
             numTokens: data.numTokens,
+            inputTokens: data.inputTokens ?? s.inputTokens,
           }));
           break;
 
@@ -192,8 +199,24 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
     postMessage({ type: "reset" });
   }, [postMessage]);
 
+  const { loadedModel, inputTokens, ...restState } = state;
+
+  const contextWindow = useMemo(() => {
+    if (!loadedModel) return 0;
+    return CONTEXT_WINDOWS[loadedModel] || 32768; // Default to 32k if unknown
+  }, [loadedModel]);
+
+  const contextFullness = useMemo(() => {
+    if (!contextWindow || inputTokens === 0) return 0;
+    return Math.min(100, Math.round((inputTokens / contextWindow) * 100));
+  }, [contextWindow, inputTokens]);
+
   return {
-    ...state,
+    ...restState,
+    loadedModel,
+    inputTokens,
+    contextFullness,
+    contextWindow,
     loadModel,
     generate,
     interrupt,
