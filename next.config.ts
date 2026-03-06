@@ -1,8 +1,20 @@
 import type { NextConfig } from "next";
+import { execSync } from "child_process";
+
+const getGitHash = () => {
+  try {
+    return execSync("git rev-parse --short HEAD").toString().trim();
+  } catch {
+    return "unknown";
+  }
+};
 
 const nextConfig: NextConfig = {
   output: "export",
   turbopack: {},
+  env: {
+    GIT_COMMIT_HASH: getGitHash(),
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

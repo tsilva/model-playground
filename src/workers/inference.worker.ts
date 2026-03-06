@@ -19,6 +19,7 @@ let tokenizer: PreTrainedTokenizer | null = null;
 let processor: any = null;
 let model: PreTrainedModel | null = null;
 let currentModelId: string | null = null;
+let currentPrecision: string | null = null;
 let shouldInterrupt = false;
 
 // Thinking parser to handle different thinking tag formats
@@ -137,10 +138,10 @@ function post(msg: WorkerResponse) {
   self.postMessage(msg);
 }
 
-async function dispose() {
+function dispose() {
   if (model) {
     try {
-      await (model as unknown as { dispose?: () => Promise<void> }).dispose?.();
+      (model as unknown as { dispose?: () => Promise<void> }).dispose?.();
     } catch {
       // ignore
     }
@@ -149,6 +150,7 @@ async function dispose() {
   tokenizer = null;
   processor = null;
   currentModelId = null;
+  currentPrecision = null;
 }
 
 function pickDtype(modelId: string, device: "webgpu" | "wasm"): string {
@@ -159,8 +161,8 @@ function pickDtype(modelId: string, device: "webgpu" | "wasm"): string {
 }
 
 async function loadModel(modelId: string, device: "webgpu" | "wasm") {
-  if (currentModelId === modelId) {
-    post({ status: "loaded", modelId, device });
+  if (currentModelId === modelId && currentPrecision) {
+    post({ status: "loaded", modelId, device, precision: currentPrecision });
     return;
   }
 
@@ -196,13 +198,16 @@ async function loadModel(modelId: string, device: "webgpu" | "wasm") {
 
       post({ status: "loading", message: "Loading model..." });
 
+      const vlmDtype = {
+        embed_tokens: "q4",
+        vision_encoder: "fp16",
+        decoder_model_merged: "q4",
+      };
+      currentPrecision = "q4/fp16";
+
       model = await AutoModelForImageTextToText.from_pretrained(modelId, {
         device,
-        dtype: {
-          embed_tokens: "q4",
-          vision_encoder: "fp16",
-          decoder_model_merged: "q4",
-        },
+        dtype: vlmDtype,
         progress_callback: progressCallback,
       } as Parameters<typeof AutoModelForImageTextToText.from_pretrained>[1]);
     } else {
@@ -213,9 +218,12 @@ async function loadModel(modelId: string, device: "webgpu" | "wasm") {
 
       post({ status: "loading", message: "Loading model..." });
 
+      const dtype = pickDtype(modelId, device);
+      currentPrecision = dtype;
+
       model = await AutoModelForCausalLM.from_pretrained(modelId, {
         device,
-        dtype: pickDtype(modelId, device),
+        dtype,
         progress_callback: progressCallback,
       } as Parameters<typeof AutoModelForCausalLM.from_pretrained>[1]);
     }
@@ -234,7 +242,7 @@ async function loadModel(modelId: string, device: "webgpu" | "wasm") {
       // Warm-up failure is non-critical
     }
 
-    post({ status: "loaded", modelId, device });
+    post({ status: "loaded", modelId, device, precision: currentPrecision! });
   } catch (err) {
     await dispose();
     post({ status: "error", error: `Failed to load model: ${(err as Error).message}` });

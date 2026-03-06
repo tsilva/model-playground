@@ -296,6 +296,7 @@ export default function Home() {
           )}
           <ModelSelector
             loadedModel={worker.loadedModel}
+            loadedPrecision={worker.loadedPrecision}
             isLoading={isLoading}
           />
           {isGenerating && worker.tps > 0 && (

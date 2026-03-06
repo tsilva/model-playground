@@ -137,6 +137,13 @@ export function SettingsModal({
           >
             Reset defaults
           </button>
+
+          {/* Git commit hash - discreet footer */}
+          <div className="pt-2 text-center">
+            <span className="text-[10px] text-[#5a5a5a] font-mono">
+              {process.env.GIT_COMMIT_HASH}
+            </span>
+          </div>
         </div>
       </div>
     </div>

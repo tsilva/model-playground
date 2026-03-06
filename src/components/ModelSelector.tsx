@@ -3,9 +3,10 @@
 interface ModelSelectorProps {
   isLoading: boolean;
   loadedModel: string | null;
+  loadedPrecision: string | null;
 }
 
-export function ModelSelector({ isLoading, loadedModel }: ModelSelectorProps) {
+export function ModelSelector({ isLoading, loadedModel, loadedPrecision }: ModelSelectorProps) {
   const isModelReady = loadedModel !== null && !isLoading;
 
   return (
@@ -20,8 +21,13 @@ export function ModelSelector({ isLoading, loadedModel }: ModelSelectorProps) {
         }`}
       />
       <span className="max-w-[140px] sm:max-w-[200px] truncate">
-        {isLoading ? "Loading..." : "Qwen3.5 0.8B"}
+        {isLoading ? "Loading..." : (loadedModel || "Qwen3.5 0.8B")}
       </span>
+      {loadedPrecision && !isLoading && (
+        <span className="text-xs text-[#8e8e8e] ml-1">
+          · {loadedPrecision}
+        </span>
+      )}
     </div>
   );
 }

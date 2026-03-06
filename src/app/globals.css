@@ -33,6 +33,21 @@ body {
   animation: fade-in 0.3s ease-out;
 }
 
+@keyframes cursor-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+.animate-cursor-pulse {
+  animation: cursor-pulse 1.2s ease-in-out infinite;
+}
+
 /* Custom scrollbar */
 .scrollbar-thin {
   scrollbar-width: thin;

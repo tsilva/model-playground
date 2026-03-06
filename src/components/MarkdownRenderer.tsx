@@ -195,7 +195,7 @@ export function MarkdownRenderer({ content, isStreaming }: MarkdownRendererProps
         {content}
       </ReactMarkdown>
       {isStreaming && (
-        <span className="inline-block w-[3px] h-[18px] ml-0.5 -mb-1 bg-white animate-pulse rounded-sm" />
+        <span className="inline-block w-2 h-2 ml-1 bg-white rounded-full animate-cursor-pulse" />
       )}
     </div>
   );

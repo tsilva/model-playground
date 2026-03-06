@@ -23,6 +23,7 @@ interface InferenceState {
   error: string | null;
   loadedModel: string | null;
   loadedDevice: string | null;
+  loadedPrecision: string | null;
   tps: number;
   numTokens: number;
 }
@@ -50,6 +51,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
     error: null,
     loadedModel: null,
     loadedDevice: null,
+    loadedPrecision: null,
     tps: 0,
     numTokens: 0,
   });
@@ -92,6 +94,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
             status: "loaded",
             loadedModel: data.modelId,
             loadedDevice: data.device,
+            loadedPrecision: data.precision,
             progress: new Map(),
             error: null,
           }));
@@ -143,6 +146,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
             status: "idle",
             loadedModel: null,
             loadedDevice: null,
+            loadedPrecision: null,
           }));
           break;
       }
