@@ -334,20 +334,22 @@ export default function Home() {
             device={device}
             webgpuSupported={webgpu.supported}
           />
-          <a
-            href="https://github.com/tsilva/llame"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto rounded-full p-2 text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors"
-            aria-label="GitHub repository"
-          >
-            <Github size={20} />
-          </a>
-          {isGenerating && worker.tps > 0 && (
-            <span className="text-xs font-mono text-[#8e8e8e]">
-              {worker.tps.toFixed(1)} t/s
-            </span>
-          )}
+          <div className="ml-auto flex items-center gap-2">
+            {isGenerating && worker.tps > 0 && (
+              <span className="text-xs font-mono text-[#8e8e8e]">
+                {worker.tps.toFixed(1)} t/s
+              </span>
+            )}
+            <a
+              href="https://github.com/tsilva/llame"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full p-2 text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors"
+              aria-label="GitHub repository"
+            >
+              <Github size={20} />
+            </a>
+          </div>
         </div>
 
         {error && (
