@@ -35,11 +35,19 @@ interface PendingImage {
   file: File;
 }
 
-const SUGGESTIONS = [
-  "Explain quantum computing in simple terms",
-  "Write a haiku about programming",
-  "What is the meaning of life?",
-  "Help me write a short story",
+import bookPageImage from "../../assets/book_page.png";
+
+interface Suggestion {
+  text: string;
+  image?: string;
+}
+
+const SUGGESTIONS: Suggestion[] = [
+  { text: "Explain quantum computing in simple terms" },
+  { text: "Write a haiku about programming" },
+  { text: "What is the meaning of life?" },
+  { text: "Help me write a short story" },
+  { text: "Transcribe and describe this book page", image: bookPageImage.src },
 ];
 
 export function ChatInterface({
@@ -190,11 +198,11 @@ export function ChatInterface({
             <div className="grid max-w-[500px] grid-cols-2 gap-2">
               {SUGGESTIONS.map((s) => (
                 <button
-                  key={s}
-                  onClick={() => onSend(s)}
+                  key={s.text}
+                  onClick={() => onSend(s.text, s.image ? [s.image] : undefined)}
                   className="rounded-xl border border-white/[0.08] px-4 py-3 text-left text-sm text-[#b4b4b4] hover:bg-[#2f2f2f] transition-colors"
                 >
-                  {s}
+                  {s.text}
                 </button>
               ))}
             </div>
