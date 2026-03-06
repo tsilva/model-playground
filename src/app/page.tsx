@@ -22,6 +22,7 @@ export default function Home() {
 
   const [params, setParams] = useState<GenerationParams>(DEFAULT_PARAMS);
   const [device, setDevice] = useState<"webgpu" | "wasm">("webgpu");
+  const [lastSelectedModel, setLastSelectedModel] = useState<string>(DEFAULT_MODEL);
   const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -58,12 +59,12 @@ export default function Home() {
       const sortedConvs = [...storage.index].sort((a, b) => b.updatedAt - a.updatedAt);
       const lastConv = sortedConvs[0];
       
-      // Reuse last chat if it has no messages
+      // Reuse last chat if it has no messages, otherwise create new
       if (lastConv && lastConv.messageCount === 0) {
         storage.setActiveConversation(lastConv.id);
       } else {
         // Create new conversation directly without callback
-        storage.createConversation();
+        storage.createConversation(lastSelectedModel);
         if (isMobile) setSidebarOpen(false);
       }
     }
@@ -183,10 +184,10 @@ export default function Home() {
       streamingThinkingRef.current = "";
       isCompleteRef.current = true;
     }
-    const newConv = storage.createConversation();
+    const newConv = storage.createConversation(lastSelectedModel);
     if (isMobile) setSidebarOpen(false);
     return newConv;
-  }, [isMobile, worker, storage]);
+  }, [isMobile, worker, storage, lastSelectedModel]);
 
   const deleteConversation = (id: string) => {
     storage.deleteConversation(id);
@@ -281,6 +282,7 @@ export default function Home() {
 
   const handleModelChange = useCallback(
     (modelId: string) => {
+      setLastSelectedModel(modelId);
       if (storage.activeConversation) {
         const updatedConv = { ...storage.activeConversation, modelId };
         storage.updateConversation(updatedConv);
@@ -301,6 +303,11 @@ export default function Home() {
       isCompleteRef.current = true;
     }
     storage.setActiveConversation(id);
+    // Update lastSelectedModel to the model of the conversation we're switching to
+    const conv = storage.index.find((c) => c.id === id);
+    if (conv) {
+      setLastSelectedModel(conv.modelId);
+    }
     if (isMobile) setSidebarOpen(false);
   };
 

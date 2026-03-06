@@ -83,7 +83,7 @@ export function useStorage() {
     [flushPendingSave]
   );
 
-  const createConversation = useCallback((): Conversation => {
+  const createConversation = useCallback((modelId?: string): Conversation => {
     // Flush any pending save
     flushPendingSave();
 
@@ -93,7 +93,7 @@ export function useStorage() {
       messages: [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      modelId: "onnx-community/Qwen3.5-0.8B-ONNX",
+      modelId: modelId || "onnx-community/Qwen3.5-2B-ONNX",
     };
 
     const newIndex = storage.saveConversation(conv, indexRef.current);
