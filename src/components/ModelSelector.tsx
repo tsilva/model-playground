@@ -38,6 +38,7 @@ export function ModelSelector({ isLoading, loadedModel, loadedPrecision, device,
     };
   }, [open]);
 
+  console.log("[ModelSelector] render - modelId prop:", modelId, "loadedModel:", loadedModel);
   const presetLabel = MODEL_PRESETS.find(p => p.id === modelId)?.label?.replace(/\s*\(.*\)/, "");
   const displayModel = isLoading
     ? "Loading..."
@@ -85,6 +86,7 @@ export function ModelSelector({ isLoading, loadedModel, loadedPrecision, device,
             <button
               key={preset.id}
               onClick={() => {
+                console.log("[ModelSelector] selecting model:", preset.id);
                 onModelChange(preset.id);
                 setOpen(false);
               }}
