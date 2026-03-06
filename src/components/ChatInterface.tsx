@@ -45,7 +45,7 @@ interface Suggestion {
 
 const SUGGESTIONS: Suggestion[] = [
   { text: "Explain quantum computing in simple terms" },
-  { text: "Write a haiku about programming" },
+  { text: "Code bubble sort in Python" },
   { text: "What is the meaning of life?" },
   { text: "Transcribe this book page", image: bookPageImage.src },
 ];

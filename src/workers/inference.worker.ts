@@ -274,9 +274,12 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
       return { role: m.role, content: m.content };
     });
 
+    // Enable thinking for Qwen3/3.5 models so they produce <think> tags
+    const isQwen = currentModelId?.toLowerCase().includes("qwen") ?? false;
     const inputText = tokenizer.apply_chat_template(chatMessages as unknown as Parameters<typeof tokenizer.apply_chat_template>[0], {
       tokenize: false,
       add_generation_prompt: true,
+      ...(isQwen && { enable_thinking: true }),
     }) as string;
 
     // Calculate input token count for context fullness tracking
@@ -301,15 +304,18 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
       skip_prompt: true,
       skip_special_tokens: false,
       callback_function: (rawToken: string) => {
+        console.log("[TOKEN RAW]", JSON.stringify(rawToken));
         // Filter out special tokens except thinking tags (which we need to parse)
         const token = rawToken.replace(/<\|[^>]*\|>/g, "");
+        console.log("[TOKEN FILTERED]", JSON.stringify(token));
         if (!token) return;
         numTokens++;
         const elapsed = (performance.now() - startTime) / 1000;
         const tps = numTokens / elapsed;
         
         const result = parser.processToken(token);
-        
+        console.log("[PARSER]", result.type, JSON.stringify(result.content), result.thinkingComplete ? "COMPLETE" : "");
+
         if (result.type === "thinking" && result.content) {
           post({ status: "update", token: result.content, tps, numTokens, inputTokens, isThinking: true });
           if (result.thinkingComplete) {

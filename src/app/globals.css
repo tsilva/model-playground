@@ -108,3 +108,120 @@ body {
     line-height: 1.625rem;
   }
 }
+
+/* Modal animations */
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-modal-enter {
+  animation: modal-enter 0.2s ease-out;
+}
+
+.animate-backdrop-enter {
+  animation: backdrop-enter 0.15s ease-out;
+}
+
+/* Industrial slider styling */
+.slider-industrial {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: #424242;
+  border-radius: 1px;
+  outline: none;
+  cursor: pointer;
+}
+
+.slider-industrial::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(
+    to right,
+    #10a37f 0%,
+    #10a37f var(--slider-fill, 0%),
+    #424242 var(--slider-fill, 0%),
+    #424242 100%
+  );
+}
+
+.slider-industrial::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #10a37f;
+  margin-top: -6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+}
+
+.slider-industrial::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px rgba(16, 163, 127, 0.2);
+}
+
+.slider-industrial::-webkit-slider-thumb:active {
+  background: #10a37f;
+  box-shadow: 0 0 0 6px rgba(16, 163, 127, 0.25);
+}
+
+.slider-industrial:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(16, 163, 127, 0.3);
+}
+
+/* Firefox */
+.slider-industrial::-moz-range-track {
+  height: 2px;
+  border-radius: 1px;
+  background: #424242;
+}
+
+.slider-industrial::-moz-range-progress {
+  height: 2px;
+  border-radius: 1px;
+  background: #10a37f;
+}
+
+.slider-industrial::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #10a37f;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+}
+
+.slider-industrial::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px rgba(16, 163, 127, 0.2);
+}
+
+.slider-industrial::-moz-range-thumb:active {
+  background: #10a37f;
+  box-shadow: 0 0 0 6px rgba(16, 163, 127, 0.25);
+}
+
+.slider-industrial:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgba(16, 163, 127, 0.3);
+}
