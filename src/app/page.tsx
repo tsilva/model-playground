@@ -271,6 +271,7 @@ export default function Home() {
   };
 
   const isLoading = worker.status === "loading";
+  const isProcessing = worker.status === "processing";
   const isGenerating = worker.status === "generating";
   const isModelLoaded = worker.status === "loaded" || worker.status === "generating";
 
@@ -326,6 +327,8 @@ export default function Home() {
         <ChatInterface
           messages={currentMessages}
           isGenerating={isGenerating}
+          isProcessing={isProcessing}
+          processingMessage={worker.processingMessage}
           isModelLoaded={isModelLoaded}
           loadedModel={worker.loadedModel}
           isLoading={isLoading}

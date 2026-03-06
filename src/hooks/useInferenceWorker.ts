@@ -14,12 +14,14 @@ export type InferenceStatus =
   | "idle"
   | "loading"
   | "loaded"
+  | "processing"
   | "generating"
   | "error";
 
 interface InferenceState {
   status: InferenceStatus;
   loadingMessage: string;
+  processingMessage: string;
   progress: Map<string, ProgressInfo>;
   error: string | null;
   loadedModel: string | null;
@@ -51,6 +53,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
   const [state, setState] = useState<InferenceState>({
     status: "idle",
     loadingMessage: "",
+    processingMessage: "",
     progress: new Map(),
     error: null,
     loadedModel: null,
@@ -60,6 +63,8 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
     numTokens: 0,
     inputTokens: 0,
   });
+
+  const interruptedRef = useRef(false);
 
   useEffect(() => {
     const worker = new Worker(
@@ -105,7 +110,16 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
           }));
           break;
 
+        case "processing":
+          setState((s) => ({
+            ...s,
+            status: "processing",
+            processingMessage: data.message,
+          }));
+          break;
+
         case "generating":
+          interruptedRef.current = false;
           setState((s) => ({
             ...s,
             status: "generating",
@@ -116,6 +130,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
           break;
 
         case "update":
+          if (interruptedRef.current) break;
           onTokenRef.current?.(data.token, data.isThinking);
           setState((s) => ({
             ...s,
@@ -126,10 +141,12 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
           break;
 
         case "thinking_complete":
+          if (interruptedRef.current) break;
           onThinkingCompleteRef.current?.(data.thinking);
           break;
 
         case "complete":
+          interruptedRef.current = false;
           onCompleteRef.current?.();
           setState((s) => ({
             ...s,
@@ -140,6 +157,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
           break;
 
         case "error":
+          interruptedRef.current = false;
           setState((s) => ({
             ...s,
             status: "error",
@@ -186,6 +204,7 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
   );
 
   const interrupt = useCallback(() => {
+    interruptedRef.current = true;
     postMessage({ type: "interrupt" });
     setState((s) => {
       if (s.status === "generating") {

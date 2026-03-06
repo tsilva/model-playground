@@ -298,6 +298,7 @@ async function generate(messages: ChatMessage[], params: GenerationParams) {
     // For VLM with images, use processor; otherwise use tokenizer
     let inputs: Record<string, unknown>;
     if (hasImages && processor) {
+      post({ status: "processing", message: "Processing image..." });
       const images = messages
         .flatMap((m) => m.images || [])
         .map((img) => RawImage.fromURL(img));

@@ -17,6 +17,8 @@ import { Sparkles, ArrowUp, Square, ImagePlus, X } from "lucide-react";
 interface ChatInterfaceProps {
   messages: ChatMessageType[];
   isGenerating: boolean;
+  isProcessing: boolean;
+  processingMessage: string;
   isModelLoaded: boolean;
   loadedModel: string | null;
   isLoading: boolean;
@@ -54,6 +56,8 @@ const STATIC_SUGGESTIONS: Suggestion[] = [
 export function ChatInterface({
   messages,
   isGenerating,
+  isProcessing,
+  processingMessage,
   isModelLoaded,
   loadedModel,
   isLoading,
@@ -276,6 +280,18 @@ export function ChatInterface({
                 message={loadingMessage}
                 modelName={modelName}
               />
+            )}
+            {/* Processing indicator - shown when processing images */}
+            {isProcessing && (
+              <div className="flex gap-3 animate-fade-in">
+                <div className="mt-1 flex-shrink-0 flex h-7 w-7 items-center justify-center rounded-full bg-[#10a37f]">
+                  <Sparkles size={14} className="text-white" />
+                </div>
+                <div className="flex items-center gap-2 py-3 text-sm text-[#b4b4b4]">
+                  <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#b4b4b4] border-t-transparent" />
+                  <span>{processingMessage}</span>
+                </div>
+              </div>
             )}
             <div ref={messagesEndRef} />
           </div>
