@@ -75,7 +75,12 @@ export function ChatInterface({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      const container = messagesEndRef.current.parentElement?.parentElement;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -86,7 +91,7 @@ export function ChatInterface({
 
   // Auto-resize textarea
   useEffect(() => {
-    if (textareaRef.current && input) {
+    if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height =
         Math.min(textareaRef.current.scrollHeight, 200) + "px";
