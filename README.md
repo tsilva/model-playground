@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
+  <img src="logo.png" alt="model-playground" width="512"/>
 
-## Getting Started
+  **🧠 Run LLMs directly in your browser — no server, no API keys, just WebGPU ⚡**
 
-First, run the development server:
+  [Live Demo](https://model-playground.vercel.app)
+</div>
+
+## Overview
+
+**The Pain:** Testing small language models means setting up Python environments, downloading weights, and wrestling with CUDA drivers — all before generating a single token.
+
+**The Solution:** model-playground runs ONNX-optimized LLMs entirely in the browser using WebGPU acceleration (with WASM fallback), powered by [Hugging Face Transformers.js](https://huggingface.co/docs/transformers.js).
+
+**The Result:** Open a URL, pick a model, and start chatting — zero setup, zero dependencies, zero server costs.
+
+<div align="center">
+
+| Metric | Value |
+|--------|-------|
+| 🖥️ Backend | None — 100% client-side |
+| ⚡ Acceleration | WebGPU (fp16) / WASM (q4) |
+| 📦 Smallest model | ~250MB download |
+| 🔧 Setup | `npm install && npm run dev` |
+
+</div>
+
+## ✨ Features
+
+- 🚀 **In-browser inference** — models run entirely on your device via Web Workers
+- ⚡ **WebGPU acceleration** — fp16 precision with automatic WASM fallback for unsupported browsers
+- 💬 **Chat interface** — real-time token streaming with tokens/second counter
+- 🔄 **Multiple models** — switch between Qwen3 0.6B, Qwen3 1.7B, and SmolLM2 360M
+- 🎛️ **Tunable generation** — temperature, top-p, top-k, repetition penalty, max tokens
+- 📊 **Progress tracking** — live download progress overlay when loading models
+- 🔒 **Private by design** — nothing leaves your browser, ever
+
+## 🚀 Quick Start
 
 ```bash
+git clone https://github.com/tsilva/model-playground.git
+cd model-playground
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) — the default model (Qwen3 0.6B) loads automatically.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/              # Next.js app router (layout + page)
+├── components/       # UI — ChatInterface, ModelSelector, SettingsPanel, StatusBar
+├── hooks/            # useWebGPU (feature detection), useInferenceWorker (worker bridge)
+├── lib/              # Constants — model presets, default generation params
+├── types/            # TypeScript interfaces — messages, worker protocol
+└── workers/          # Web Worker — model loading, tokenization, generation
+```
 
-## Learn More
+All inference runs in a dedicated Web Worker (`inference.worker.ts`) using `@huggingface/transformers`, keeping the UI thread free.
 
-To learn more about Next.js, take a look at the following resources:
+## 🎛️ Supported Models
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Model | Size | Download |
+|-------|------|----------|
+| Qwen3 0.6B | 0.6B params | ~400MB |
+| Qwen3 1.7B | 1.7B params | ~1GB |
+| SmolLM2 360M | 360M params | ~250MB |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Models are loaded from the [ONNX Community](https://huggingface.co/onnx-community) on Hugging Face and cached in the browser after first download.
 
-## Deploy on Vercel
+## 🌐 Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The app is configured as a static export (`output: "export"`) with required `Cross-Origin-Embedder-Policy` and `Cross-Origin-Opener-Policy` headers for `SharedArrayBuffer` support.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy to Vercel:
+
+```bash
+npm run build
+```
+
+The included `vercel.json` handles the required COOP/COEP headers automatically.
+
+## 🛠️ Tech Stack
+
+- [Next.js 16](https://nextjs.org/) — static export
+- [React 19](https://react.dev/) — UI
+- [@huggingface/transformers](https://huggingface.co/docs/transformers.js) — in-browser inference
+- [Tailwind CSS 4](https://tailwindcss.com/) — styling
+- [TypeScript](https://www.typescriptlang.org/) — type safety
+- [WebGPU](https://www.w3.org/TR/webgpu/) / [WebAssembly](https://webassembly.org/) — compute backends
+
+## 📄 License
+
+MIT
