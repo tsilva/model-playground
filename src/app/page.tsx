@@ -3,18 +3,25 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { ChatMessage as ChatMessageType, Conversation, GenerationParams } from "@/types";
 import { DEFAULT_PARAMS, DEFAULT_MODEL } from "@/lib/constants";
-import { useWebGPU } from "@/hooks/useWebGPU";
 import { useInferenceWorker } from "@/hooks/useInferenceWorker";
 import { useStorage } from "@/hooks/useStorage";
-import { ErrorBanner } from "@/components/ErrorBanner";
 import { ChatInterface } from "@/components/ChatInterface";
 import { ModelSelector } from "@/components/ModelSelector";
 import { Sidebar } from "@/components/Sidebar";
 import { SettingsModal } from "@/components/SettingsModal";
-import { PanelLeft, Github } from "lucide-react";
+import { PanelLeft, Github, X } from "lucide-react";
 
 export default function Home() {
-  const webgpu = useWebGPU();
+  const [webgpuSupported, setWebgpuSupported] = useState<boolean | null>(null);
+  useEffect(() => {
+    (async () => {
+      if (!navigator.gpu) { setWebgpuSupported(false); return; }
+      try {
+        const adapter = await navigator.gpu.requestAdapter();
+        setWebgpuSupported(!!adapter);
+      } catch { setWebgpuSupported(false); }
+    })();
+  }, []);
   const worker = useInferenceWorker();
   const storage = useStorage();
 
@@ -83,10 +90,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (webgpu.supported === false) {
+    if (webgpuSupported === false) {
       setDevice("wasm");
     }
-  }, [webgpu.supported]);
+  }, [webgpuSupported]);
 
   useEffect(() => {
     if (worker.error) {
@@ -353,7 +360,7 @@ export default function Home() {
             loadedPrecision={worker.loadedPrecision}
             isLoading={isLoading}
             device={device}
-            webgpuSupported={webgpu.supported}
+            webgpuSupported={webgpuSupported}
             modelId={storage.activeConversation?.modelId || DEFAULT_MODEL}
             onModelChange={handleModelChange}
             isGenerating={isGenerating}
@@ -377,7 +384,13 @@ export default function Home() {
         </div>
 
         {error && (
-          <ErrorBanner error={error} onDismiss={() => setError(null)} />
+          <div className="mx-3 mb-2 flex items-start gap-2 sm:gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2.5 sm:px-4 sm:py-3">
+            <span className="mt-0.5 text-red-400">&#x26A0;</span>
+            <p className="flex-1 text-sm text-red-300">{error}</p>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 transition-colors">
+              <X size={16} />
+            </button>
+          </div>
         )}
 
         <ChatInterface
@@ -411,7 +424,7 @@ export default function Home() {
         onChange={setParams}
         device={device}
         onDeviceChange={handleDeviceChange}
-        webgpuAvailable={webgpu.supported ?? false}
+        webgpuAvailable={webgpuSupported ?? false}
         storageStats={storage.storageStats}
         conversationsCount={storage.index.length}
         onClearAllChats={() => {

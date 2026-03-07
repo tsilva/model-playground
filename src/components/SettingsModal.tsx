@@ -1,7 +1,7 @@
 "use client";
 
 import { GenerationParams, StorageStats } from "@/types";
-import { DEFAULT_PARAMS, PARAM_RANGES } from "@/lib/constants";
+import { DEFAULT_PARAMS, PARAM_RANGES, SLIDER_CONFIGS } from "@/lib/constants";
 import { X, Trash, Cpu, RotateCcw, HardDrive } from "lucide-react";
 
 interface SettingsModalProps {
@@ -192,46 +192,18 @@ export function SettingsModal({
           <div className="space-y-4">
             <SectionHeader label="Inference" />
 
-            <Slider
-              label="Max tokens"
-              value={params.max_new_tokens}
-              {...PARAM_RANGES.max_new_tokens}
-              onChange={(v) => update("max_new_tokens", v)}
-              disabled={isGenerating}
-            />
-
-            {params.do_sample && (
-              <>
+            {SLIDER_CONFIGS
+              .filter((s) => !s.samplingOnly || params.do_sample)
+              .map((s) => (
                 <Slider
-                  label="Temperature"
-                  value={params.temperature}
-                  {...PARAM_RANGES.temperature}
-                  onChange={(v) => update("temperature", v)}
+                  key={s.key}
+                  label={s.label}
+                  value={params[s.key] as number}
+                  {...PARAM_RANGES[s.key]}
+                  onChange={(v) => update(s.key, v)}
                   disabled={isGenerating}
                 />
-                <Slider
-                  label="Top P"
-                  value={params.top_p}
-                  {...PARAM_RANGES.top_p}
-                  onChange={(v) => update("top_p", v)}
-                  disabled={isGenerating}
-                />
-                <Slider
-                  label="Top K"
-                  value={params.top_k}
-                  {...PARAM_RANGES.top_k}
-                  onChange={(v) => update("top_k", v)}
-                  disabled={isGenerating}
-                />
-                <Slider
-                  label="Repetition penalty"
-                  value={params.repetition_penalty}
-                  {...PARAM_RANGES.repetition_penalty}
-                  onChange={(v) => update("repetition_penalty", v)}
-                  disabled={isGenerating}
-                />
-              </>
-            )}
+              ))}
           </div>
 
           {/* STORAGE section */}

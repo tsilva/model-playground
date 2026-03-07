@@ -29,3 +29,11 @@ export const PARAM_RANGES = {
   top_k: { min: 1, max: 200, step: 1 },
   repetition_penalty: { min: 1.0, max: 2.0, step: 0.05 },
 };
+
+export const SLIDER_CONFIGS: { label: string; key: keyof typeof PARAM_RANGES; samplingOnly?: boolean }[] = [
+  { label: "Max tokens", key: "max_new_tokens" },
+  { label: "Temperature", key: "temperature", samplingOnly: true },
+  { label: "Top P", key: "top_p", samplingOnly: true },
+  { label: "Top K", key: "top_k", samplingOnly: true },
+  { label: "Repetition penalty", key: "repetition_penalty", samplingOnly: true },
+];

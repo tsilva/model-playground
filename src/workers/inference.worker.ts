@@ -28,79 +28,47 @@ class ThinkingParser {
   private buffer = "";
   private inThinking = false;
   private thinkingContent = "";
-  private contentBuffer = "";
   private thinkingComplete = false;
-  private hasDetectedThinking = false;
+
+  private static readonly START_RE = /<(think|thinking|thought|reasoning)>/;
+  private static readonly END_RE = /<\/(think|thinking|thought|reasoning)>/;
 
   constructor(startInThinking = false) {
-    if (startInThinking) {
-      this.inThinking = true;
-      this.hasDetectedThinking = true;
-    }
+    if (startInThinking) this.inThinking = true;
   }
 
-  // Tag patterns for different model formats
-  private static readonly START_PATTERNS = [
-    "<thinking>",
-    "<thought>",
-    "<reasoning>",
-    "<think>",
-  ];
-
-  private static readonly END_PATTERNS = [
-    "</thinking>",
-    "</thought>",
-    "</reasoning>",
-    "</think>",
-  ];
-
   processToken(token: string): {
-    type: "thinking" | "content" | "buffer"; 
+    type: "thinking" | "content" | "buffer";
     content: string;
     thinkingComplete?: boolean;
   } {
     this.buffer += token;
 
-    // Check for thinking start patterns
     if (!this.inThinking && !this.thinkingComplete) {
-      for (const pattern of ThinkingParser.START_PATTERNS) {
-        if (this.buffer.includes(pattern)) {
-          this.inThinking = true;
-          this.hasDetectedThinking = true;
-          // Extract any content before the thinking tag
-          const beforeThinking = this.buffer.split(pattern)[0];
-          this.buffer = this.buffer.substring(this.buffer.indexOf(pattern) + pattern.length);
-          if (beforeThinking) {
-            return { type: "content", content: beforeThinking };
-          }
-          return { type: "buffer", content: "" };
-        }
+      const startMatch = this.buffer.match(ThinkingParser.START_RE);
+      if (startMatch) {
+        this.inThinking = true;
+        const before = this.buffer.slice(0, startMatch.index!);
+        this.buffer = this.buffer.slice(startMatch.index! + startMatch[0].length);
+        if (before) return { type: "content", content: before };
+        return { type: "buffer", content: "" };
       }
     }
 
-    // Check for thinking end patterns
     if (this.inThinking) {
-      for (const pattern of ThinkingParser.END_PATTERNS) {
-        if (this.buffer.includes(pattern)) {
-          const thinkingPart = this.buffer.split(pattern)[0];
-          this.thinkingContent += thinkingPart;
-          this.inThinking = false;
-          this.thinkingComplete = true;
-          this.buffer = this.buffer.substring(this.buffer.indexOf(pattern) + pattern.length);
-          return { 
-            type: "thinking", 
-            content: thinkingPart,
-            thinkingComplete: true 
-          };
-        }
+      const endMatch = this.buffer.match(ThinkingParser.END_RE);
+      if (endMatch) {
+        const thinkingPart = this.buffer.slice(0, endMatch.index!);
+        this.thinkingContent += thinkingPart;
+        this.inThinking = false;
+        this.thinkingComplete = true;
+        this.buffer = this.buffer.slice(endMatch.index! + endMatch[0].length);
+        return { type: "thinking", content: thinkingPart, thinkingComplete: true };
       }
-      // Still in thinking, accumulate all
       this.thinkingContent += token;
       return { type: "thinking", content: token };
     }
 
-    // Not in thinking, check if we should emit content
-    // Only emit if we have enough to avoid partial tag matches
     if (this.buffer.length > 20) {
       const toEmit = this.buffer.slice(0, -10);
       this.buffer = this.buffer.slice(-10);
@@ -111,27 +79,12 @@ class ThinkingParser {
   }
 
   flush(): { type: "thinking" | "content"; content: string } | null {
-    if (this.buffer) {
-      if (this.inThinking) {
-        this.thinkingContent += this.buffer;
-        return { type: "thinking", content: this.buffer };
-      } else {
-        return { type: "content", content: this.buffer };
-      }
+    if (!this.buffer) return null;
+    if (this.inThinking) {
+      this.thinkingContent += this.buffer;
+      return { type: "thinking", content: this.buffer };
     }
-    return null;
-  }
-
-  isInThinking(): boolean {
-    return this.inThinking;
-  }
-
-  isThinkingComplete(): boolean {
-    return this.thinkingComplete;
-  }
-
-  hasThinking(): boolean {
-    return this.hasDetectedThinking;
+    return { type: "content", content: this.buffer };
   }
 
   getThinkingContent(): string {
@@ -208,7 +161,7 @@ async function loadModel(modelId: string, device: "webgpu" | "wasm") {
         vision_encoder: "fp16",
         decoder_model_merged: "q4",
       };
-      currentPrecision = "q4/fp16";
+      currentPrecision = "q4";
 
       model = await AutoModelForImageTextToText.from_pretrained(modelId, {
         device,

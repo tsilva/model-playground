@@ -73,109 +73,36 @@ export function useInferenceWorker(): UseInferenceWorkerReturn {
     );
 
     worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
-      const data = event.data;
+      const d = event.data;
 
-      switch (data.status) {
-        case "ready":
-          setState((s) => ({ ...s, status: "idle" }));
-          break;
-
-        case "loading":
-          setState((s) => ({
-            ...s,
-            status: "loading",
-            loadingMessage: data.message,
-            progress: new Map(),
-            error: null,
-          }));
-          break;
-
-        case "progress":
-          setState((s) => {
-            const progress = new Map(s.progress);
-            progress.set(data.progress.file, data.progress);
-            return { ...s, progress };
-          });
-          break;
-
-        case "loaded":
-          setState((s) => ({
-            ...s,
-            status: "loaded",
-            loadedModel: data.modelId,
-            loadedDevice: data.device,
-            loadedPrecision: data.precision,
-            progress: new Map(),
-            error: null,
-          }));
-          break;
-
-        case "processing":
-          setState((s) => ({
-            ...s,
-            status: "processing",
-            processingMessage: data.message,
-          }));
-          break;
-
-        case "generating":
-          interruptedRef.current = false;
-          setState((s) => ({
-            ...s,
-            status: "generating",
-            tps: 0,
-            numTokens: 0,
-            inputTokens: 0,
-          }));
-          break;
-
-        case "update":
-          if (interruptedRef.current) break;
-          onTokenRef.current?.(data.token, data.isThinking);
-          setState((s) => ({
-            ...s,
-            tps: data.tps,
-            numTokens: data.numTokens,
-            inputTokens: data.inputTokens ?? s.inputTokens,
-          }));
-          break;
-
-        case "thinking_complete":
-          if (interruptedRef.current) break;
-          onThinkingCompleteRef.current?.(data.thinking);
-          break;
-
-        case "complete":
-          if (!interruptedRef.current) {
-            onCompleteRef.current?.();
-          }
-          interruptedRef.current = false;
-          setState((s) => ({
-            ...s,
-            status: "loaded",
-            tps: data.tps,
-            numTokens: data.numTokens,
-          }));
-          break;
-
-        case "error":
-          interruptedRef.current = false;
-          setState((s) => ({
-            ...s,
-            status: "error",
-            error: data.error,
-          }));
-          break;
-
-        case "unloaded":
-          setState((s) => ({
-            ...s,
-            status: "idle",
-            loadedModel: null,
-            loadedDevice: null,
-            loadedPrecision: null,
-          }));
-          break;
+      if (d.status === "ready") {
+        setState((s) => ({ ...s, status: "idle" }));
+      } else if (d.status === "loading") {
+        setState((s) => ({ ...s, status: "loading", loadingMessage: d.message, progress: new Map(), error: null }));
+      } else if (d.status === "progress") {
+        setState((s) => { const p = new Map(s.progress); p.set(d.progress.file, d.progress); return { ...s, progress: p }; });
+      } else if (d.status === "loaded") {
+        setState((s) => ({ ...s, status: "loaded", loadedModel: d.modelId, loadedDevice: d.device, loadedPrecision: d.precision, progress: new Map(), error: null }));
+      } else if (d.status === "processing") {
+        setState((s) => ({ ...s, status: "processing", processingMessage: d.message }));
+      } else if (d.status === "generating") {
+        interruptedRef.current = false;
+        setState((s) => ({ ...s, status: "generating", tps: 0, numTokens: 0, inputTokens: 0 }));
+      } else if (d.status === "update") {
+        if (interruptedRef.current) return;
+        onTokenRef.current?.(d.token, d.isThinking);
+        setState((s) => ({ ...s, tps: d.tps, numTokens: d.numTokens, inputTokens: d.inputTokens ?? s.inputTokens }));
+      } else if (d.status === "thinking_complete") {
+        if (!interruptedRef.current) onThinkingCompleteRef.current?.(d.thinking);
+      } else if (d.status === "complete") {
+        if (!interruptedRef.current) onCompleteRef.current?.();
+        interruptedRef.current = false;
+        setState((s) => ({ ...s, status: "loaded", tps: d.tps, numTokens: d.numTokens }));
+      } else if (d.status === "error") {
+        interruptedRef.current = false;
+        setState((s) => ({ ...s, status: "error", error: d.error }));
+      } else if (d.status === "unloaded") {
+        setState((s) => ({ ...s, status: "idle", loadedModel: null, loadedDevice: null, loadedPrecision: null }));
       }
     };
 
