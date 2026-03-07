@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { ChatMessage as ChatMessageType } from "@/types";
 import { ThinkingBlock } from "./ThinkingBlock";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { ImageLightbox } from "./ImageLightbox";
 import { Sparkles } from "lucide-react";
 
 interface ChatMessageProps {
@@ -25,28 +27,38 @@ export function ChatMessage({
   const isUser = message.role === "user";
   const hasThinking = message.thinking !== undefined && message.thinking !== null;
   const hasImages = message.images && message.images.length > 0;
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   if (isUser) {
     return (
-      <div className="flex justify-end animate-fade-in">
-        <div className="max-w-[85%] md:max-w-[70%]">
-          {hasImages && (
-            <div className="flex gap-2 mb-2 flex-wrap justify-end">
-              {message.images!.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt={`Attachment ${idx + 1}`}
-                  className="max-w-[160px] max-h-[120px] sm:max-w-[200px] sm:max-h-[150px] object-cover rounded-2xl border border-white/[0.08]"
-                />
-              ))}
+      <>
+        <div className="flex justify-end animate-fade-in">
+          <div className="max-w-[85%] md:max-w-[70%]">
+            {hasImages && (
+              <div className="flex gap-2 mb-2 flex-wrap justify-end">
+                {message.images!.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`Attachment ${idx + 1}`}
+                    onClick={() => setSelectedImage(img)}
+                    className="max-w-[160px] max-h-[120px] sm:max-w-[200px] sm:max-h-[150px] object-cover rounded-2xl border border-white/[0.08] cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                ))}
+              </div>
+            )}
+            <div className="rounded-3xl bg-[#2f2f2f] px-5 py-3 text-sm leading-relaxed text-[#ececec] whitespace-pre-wrap break-words">
+              {message.content}
             </div>
-          )}
-          <div className="rounded-3xl bg-[#2f2f2f] px-5 py-3 text-sm leading-relaxed text-[#ececec] whitespace-pre-wrap break-words">
-            {message.content}
           </div>
         </div>
-      </div>
+        {selectedImage && (
+          <ImageLightbox
+            src={selectedImage}
+            onClose={() => setSelectedImage(null)}
+          />
+        )}
+      </>
     );
   }
 
