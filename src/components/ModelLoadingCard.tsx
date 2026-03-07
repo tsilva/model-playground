@@ -18,9 +18,9 @@ export function ModelLoadingCard({
   const [showDetails, setShowDetails] = useState(false);
   const maxPercentRef = useRef(0);
   const entries = Array.from(progress.values());
-  const totalLoaded = entries.reduce((s, p) => s + p.loaded, 0);
-  const totalSize = entries.reduce((s, p) => s + p.total, 0);
-  const rawPercent = totalSize > 0 ? (totalLoaded / totalSize) * 100 : 0;
+  // Use pre-computed progress values from worker instead of recalculating from bytes
+  const totalProgress = entries.reduce((sum, p) => sum + p.progress, 0);
+  const rawPercent = entries.length > 0 ? totalProgress / entries.length : 0;
 
   if (entries.length === 0) {
     maxPercentRef.current = 0;
@@ -107,7 +107,7 @@ export function ModelLoadingCard({
 
               {/* Total size */}
               <div className="text-center text-xs text-[#8e8e8e]">
-                {formatBytes(totalLoaded)} / {formatBytes(totalSize)}
+                {formatBytes(entries.reduce((s, p) => s + p.loaded, 0))} / {formatBytes(entries.reduce((s, p) => s + p.total, 0))}
               </div>
             </>
           )}
