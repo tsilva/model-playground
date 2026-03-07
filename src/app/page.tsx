@@ -394,6 +394,7 @@ export default function Home() {
         )}
 
         <ChatInterface
+          conversationId={storage.activeConversationId}
           messages={currentMessages}
           isGenerating={isGenerating}
           isProcessing={isProcessing}

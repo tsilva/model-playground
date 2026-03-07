@@ -3,6 +3,7 @@
 import {
   useRef,
   useEffect,
+  useLayoutEffect,
   useState,
   KeyboardEvent,
   DragEvent,
@@ -16,6 +17,7 @@ import { compressImage } from "@/lib/imageUtils";
 import { Sparkles, ArrowUp, Square, ImagePlus, X, Brain } from "lucide-react";
 
 interface ChatInterfaceProps {
+  conversationId: string | null;
   messages: ChatMessageType[];
   isGenerating: boolean;
   isProcessing: boolean;
@@ -58,6 +60,7 @@ const STATIC_SUGGESTIONS: Suggestion[] = [
 ];
 
 export function ChatInterface({
+  conversationId,
   messages,
   isGenerating,
   isProcessing,
@@ -78,6 +81,10 @@ export function ChatInterface({
   thinkingEnabled,
   onToggleThinking,
 }: ChatInterfaceProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScrollRef = useRef(true);
+  const previousMessageCountRef = useRef(messages.length);
+  const previousConversationIdRef = useRef<string | null>(conversationId);
   const [input, setInput] = useState("");
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -86,14 +93,24 @@ export function ChatInterface({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      const container = messagesEndRef.current.parentElement?.parentElement;
-      if (container) {
-        container.scrollTop = container.scrollHeight;
-      }
+  useLayoutEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const conversationChanged = conversationId !== previousConversationIdRef.current;
+    const messageCountChanged = messages.length !== previousMessageCountRef.current;
+
+    if (conversationChanged || messageCountChanged) {
+      shouldAutoScrollRef.current = true;
     }
-  }, [messages]);
+
+    if (shouldAutoScrollRef.current) {
+      container.scrollTop = container.scrollHeight;
+    }
+
+    previousConversationIdRef.current = conversationId;
+    previousMessageCountRef.current = messages.length;
+  }, [conversationId, messages, isLoading, isProcessing]);
 
   useEffect(() => {
     if (!isGenerating && textareaRef.current) {
@@ -212,6 +229,15 @@ export function ChatInterface({
     setPendingImages((prev) => prev.filter((img) => img.id !== id));
   };
 
+  const handleMessagesScroll = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    shouldAutoScrollRef.current = distanceFromBottom < 48;
+  };
+
   const hasMessages = messages.length > 0;
   const modelName = MODEL_PRESETS.find(p => p.id === modelId)?.label?.replace(/\s*\(.*\)/, "") || modelId.split("/").pop() || "Unknown model";
   const needsLoad = !isModelLoaded;
@@ -233,7 +259,11 @@ export function ChatInterface({
       )}
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      <div
+        ref={scrollContainerRef}
+        onScroll={handleMessagesScroll}
+        className="flex-1 overflow-y-auto scrollbar-thin"
+      >
         {!hasMessages && (
           <div className="flex h-full flex-col items-center justify-center px-4">
             <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-[#10a37f]">
